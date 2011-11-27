@@ -421,7 +421,7 @@ performAllSpatialWeighting <- function(contextual.names,
                             nb.analyses=nb.analyses,
                             individual.weight.names=NULL,
                             contextual.data=contextual.data,
-                            aggregation.function=NULL,
+                            aggregation.functions=NULL,
                             contextual.weight.matrices=contextual.weight.matrices))
 }
 
