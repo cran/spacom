@@ -1,0 +1,27 @@
+
+exportMethods(
+    "AIC",
+    "BIC",
+    "fixef",
+    "print",
+    "ranef",
+    "show",
+    "summary",
+    "VarCorr" 
+)
+
+
+
+importFrom("lme4", "AIC", "BIC", "VarCorr", "fixef", "ranef")
+importFrom("spdep", "lm.morantest", "mat2listw")
+importFrom("foreach", "%do%", "%dopar%")
+
+export("SpawML",
+       "ResampleExactSpawML",
+       "ResampleAggregateSpawML",
+       "WeightMatrix",
+       "SpawMLResidMoran",
+       "ExploreSpawML",
+       "ResampleExploreSpawML",
+       "DescribeAggregate",
+       "DescribeExact")
