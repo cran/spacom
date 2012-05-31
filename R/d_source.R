@@ -114,6 +114,7 @@ summary.SpawMLOutput <- function(object,...) {
   message("\nStandardised fixed effects:")
   print(object@beta)}
 
+setGeneric("summary")
 setMethod("summary",
           signature=c("SpawMLOutput"),
           definition=summary.SpawMLOutput)
@@ -140,6 +141,7 @@ printSmlObject <- function(x, is.print=TRUE) {
   print(x@beta)
 }
 
+setGeneric("print")
 setMethod("print", signature="SpawMLOutput",
           definition=printSmlObject)
 setMethod("show", signature="SpawMLOutput",
