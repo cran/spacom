@@ -1,12 +1,23 @@
 \name{WeightMatrix}
 \alias{WeightMatrix}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Create weight matrices}
+\title{Create spatial weighting matrices}
+
 \description{
-  %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-  Creates a weight matrix corresponding to a given distance matrix, bandwidth and
-  kernel function for spatially weighted multilevel analysis.
+
+  This step-1 function creates a matrix of spatial weights on the basis of a
+  user-defined distance matrix, Kernel function, and bandwidth value. The
+  distance matrix needs to specify a value for each of the possible \eqn{n\times
+  n}{n by n} binomials that correspond to n contextual units. It can be either
+  symmetric or asymmetric. In principle, its diagonal, corresponding to the
+  distance of each unit with itself, should be composed of zero values. A Kernel
+  function proposed by default generates spatial weights that tend toward 1 for
+  distances substantially lower than the bandwidth value, toward 0 for distances
+  substantially higher than the bandwidth value and toward 0.5 for distances
+  approaching the bandwidth value.
+
 }
+
 \usage{
 WeightMatrix(distance.matrix, bandwidth, kernel = NULL,
   moran = FALSE)
@@ -39,40 +50,26 @@ WeightMatrix(distance.matrix, bandwidth, kernel = NULL,
     should have zeros in the diagonal. By default set to \code{FALSE}.
 }
 }
-\details{
-  %%  ~~ If necessary, more details than the description above ~~
-}
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-A weights matrix of the same dimension as \code{distance.matrix}.
+  A weights matrix of the same dimension as \code{distance.matrix}.
 }
 \references{
-%% ~put references to the literature/web site here ~
+Elcheroth, G., Penic, S., Fasel, R., Giudici, F., Glaeser, S., Joye, D.,
+Le Goff, J.-M., Morselli, D., & Spini, D. (2012). Spatially weighted
+context data: a new approach for modelling the impact of collective
+experiences. \emph{LIVES Working Papers, 19}.
 }
 \author{
   %%  ~~who you are~~
   Till Junge, Sandra Penic, Guy Elcheroth
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 # creating geographical proximity weight, with bandwidth h=50
 
 data(d_geo) 
-\donttest{geow_50 <- WeightMatrix(distance.matrix=d_geo, bandwidth=50)}
+geow_50 <- WeightMatrix(distance.matrix=d_geo, bandwidth=50)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ spacom }
-\keyword{ SpawML }% __ONLY ONE__ keyword per line
+\keyword{ spatial }% __ONLY ONE__ keyword per line

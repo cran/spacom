@@ -8,8 +8,8 @@ in the ethnic composition of a population.
 
      }
      \usage{d_ethnic}
-     \source{Elcheroth, G., Penic, S., Fasel, R., Giudici, F., Glaeser, S., Joye, D., Le Goff, J.-M., Morselli, D., & Spini, D. (forthcoming). Spatially weighted context data: a new approach for modelling the impact of collective experiences. \emph{LIVES Working Papers, 4}. 
+     \source{Elcheroth, G., Penic, S., Fasel, R., Giudici, F., Glaeser, S., Joye, D., Le Goff, J.-M., Morselli, D., & Spini, D. (2012). Spatially weighted context data: a new approach for modelling the impact of collective experiences. \emph{LIVES Working Papers, 19}. 
 }
      \examples{data(d_ethnic)
-w_eth <- WeightMatrix(distance.matrix=d_ethnic, bandwidth=1)
+w.eth <- WeightMatrix(distance.matrix=d_ethnic, bandwidth=1)
 }

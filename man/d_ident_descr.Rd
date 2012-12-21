@@ -8,8 +8,8 @@ common identification.
 
      }
      \usage{d_ident}
-     \source{Elcheroth, G., Penic, S., Fasel, R., Giudici, F., Glaeser, S., Joye, D., Le Goff, J.-M., Morselli, D., & Spini, D. (forthcoming). Spatially weighted context data: a new approach for modelling the impact of collective experiences.\emph{LIVES Working Papers, 4}. 
+     \source{Elcheroth, G., Penic, S., Fasel, R., Giudici, F., Glaeser, S., Joye, D., Le Goff, J.-M., Morselli, D., & Spini, D. (2012). Spatially weighted context data: a new approach for modelling the impact of collective experiences.\emph{LIVES Working Papers, 19}. 
 }
      \examples{data(d_ident)
-w_id <- WeightMatrix(distance.matrix=d_ident, bandwidth=2)
+w.id <- WeightMatrix(distance.matrix=d_ident, bandwidth=2)
 }

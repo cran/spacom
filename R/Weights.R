@@ -1,6 +1,6 @@
 ################################################################################
 ################################################################################
-## author Till Junge <till.junge@unil.ch>                                     ##
+## author Till Junge <till.junge@gmail.com>                                   ##
 ##                                                                            ##
 ## Copyright (c) UNIL (Universite de Lausanne)                                ##
 ## NCCR - LIVES (National Centre of Competence in Research "LIVES –           ##
@@ -43,8 +43,8 @@ makeWeightsObject <- function(distance.matrix,
   tryCatch(moran <- as.logical(moran),
            error=function(er) {
              stop("The variable you specified for the argument 'moran' could ",
-                  "be coerced into a logical value. Please specify TRUE, or, ",
-                  FALSE)})
+                  "not be coerced into a logical value. Please specify TRUE ",
+                  "or False")})
   obj@moran <- moran
 
   return(obj)
@@ -52,15 +52,14 @@ makeWeightsObject <- function(distance.matrix,
 
 performWeights <- function(obj, bandwidth) {
   mat <- obj@kernel(obj@distance.matrix, bandwidth)
-  
   if (obj@moran) {
     diag(mat) <- 0
   }
-  
+
   return(mat)
 }
 
-WeightMatrix <- function(distance.matrix, bandwidth, kernel=NULL, moran=FALSE) {  
+WeightMatrix <- function(distance.matrix, bandwidth, kernel=NULL, moran=FALSE) {
   obj <- makeWeightsObject(distance.matrix, kernel, moran)
   return(performWeights(obj, bandwidth))
 }
