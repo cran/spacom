@@ -7,7 +7,8 @@ exportMethods(
     "ranef",
     "show",
     "summary",
-    "VarCorr" 
+    "VarCorr",
+    "merge"
 )
 
 
@@ -15,13 +16,22 @@ exportMethods(
 importFrom("lme4", "AIC", "BIC", "VarCorr", "fixef", "ranef")
 importFrom("spdep", "lm.morantest", "mat2listw")
 importFrom("foreach", "%do%", "%dopar%")
+importFrom("iterators", "nextElem")
 
-export("SpawML",
-       "ResampleExactSpawML",
-       "ResampleAggregateSpawML",
+export("MLSpawExact",
+       "ResampleMLSpawExact",
+       "ResampleMLSpawAggregate",
        "WeightMatrix",
-       "SpawMLResidMoran",
-       "ExploreSpawML",
-       "ResampleExploreSpawML",
-       "DescribeAggregate",
-       "DescribeExact")
+       "MLSpawResidMoran",
+       "ExploreMLSpawExact",
+       "ExploreMLSpawAggregate",
+       "SpawAggregate",
+       "SpawExact",
+       "wt.gini.group",
+       "wt.gini",
+       "wt.gini.categ",
+       "wt.var",
+       "wt.sd",
+       "wt.RS",
+       "wt.Atkinson",
+       "wt.Theil")

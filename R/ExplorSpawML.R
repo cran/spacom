@@ -1,6 +1,6 @@
 ################################################################################
 ################################################################################
-## author Till Junge <till.junge@unil.ch>                                     ##
+## author Till Junge <till.junge@gmail.com>                                   ##
 ##                                                                            ##
 ## Copyright (c) UNIL (Universite de Lausanne)                                ##
 ## NCCR - LIVES (National Centre of Competence in Research "LIVES –           ##
@@ -18,7 +18,7 @@
 ################################################################################
 ################################################################################
 
-MakeExploreSpawMLObject <-
+MakeExploreMLSpawObject <-
   function(individual.level.data,
            contextual.name,
            contextual.data,
@@ -27,9 +27,10 @@ MakeExploreSpawMLObject <-
            formula,
            distance.matrix,
            multilevel.bandwidths,
-           individual.weight.names=NULL,
+           design.weight.names=NULL,
            aggregation.function="mean",
-           kernel=NULL)
+           kernel=NULL,
+           additional.args=NULL)
 {
   obj <- new("ExploreSpawML")
 
@@ -41,27 +42,32 @@ MakeExploreSpawMLObject <-
   obj@contextual.data <- checkType(obj=contextual.data,
                                    classes=c("NULL", "data.frame"),
                                    name="contextual.data")
+
   obj@precise.data <- checkType(obj=precise.data,
                                    classes=c("NULL", "data.frame"),
                                    name="precise.data")
-  contextual.variables <- names(GetContextMethod(obj))
+  contextual.variables <- names(GetContext(obj))
   if (!is.null(precise.data)) {
     contextual.variables <- c(contextual.variables,
                               names(precise.data))
   }
   obj <- checkContextualNames(obj, contextual.name, contextual.variables)
 
-  obj@individual.weight.name <-
-    checkIndividualWeights(individual.weight.names, obj@contextual.names,
-                           contextual.variables)
+  obj@design.weight.name <-
+    checkExistence(design.weight.names,
+                   contextual.variables)
 
 
   ## make sure context.id is a name in contextual.data
-  obj@context.id <- checkContextId(context.id, names(obj@individual.level.data),
-                                   contextual.variables,
-                                   NULL)
+  obj@context.id <-
+    checkContextId(
+      context.id=context.id,
+      individual.level.data.names=names(obj@individual.level.data),
+      precise.data.names=contextual.variables,
+      skip.individual.check=FALSE)
+
   ## extract number of upper level units
-  obj@nb.area <- length(levels(as.factor(GetContextMethod(obj)[[context.id]])))
+  obj@nb.area <- length(levels(as.factor(GetContext(obj)[[context.id]])))
 
   ## make sure the formula isn't a string anymore
   obj@formula <- checkFormula(formula)
@@ -103,10 +109,13 @@ MakeExploreSpawMLObject <-
   ## deal with kernel function
   obj@kernel <- checkKernel(kernel)
 
+    ## make sure the additional.args are ok
+  obj@ additional.args <- additional.args
+
   return(obj)
 }
 
-performExploreSpawML <- function(obj){
+performExploreMLSpaw <- function(obj){
   ## prepare a weights object to compute weight.matrices on the fly
   weight.object <- new("weightsObject",
                        distance.matrix=obj@distance.matrix,
@@ -115,77 +124,72 @@ performExploreSpawML <- function(obj){
   coded.name <- obj@contextual.names[[1]]
   name <- substr(coded.name, 1, nchar(coded.name)-5)
 
-  message("computing spatially unweighted contextual indicators")
+  output.list <- list()
+  for (bandwidth in obj@multilevel.bandwidths) {
+    ## compute the weight matrix
+    weight.matrix <- performWeights(weight.object, bandwidth)
 
-  ## generate unweighted contextual data
-  if (length(obj@aggregation.names) == 0){
-    merge.data <- obj@precise.data
-  } else {
-    if (is.null(obj@individual.weight.name)) {
-      aggregated.context <-
-        matrix(aggregate(obj@contextual.data[[name]],
-                         list(GetContextMethod(obj)[[obj@context.id]]),
-                         obj@aggregation.function[[1]])[,2],
-               ncol=1)
+    ## if precise.data is not NULL, we're in exact mode
+    if (!is.null(obj@precise.data)) {
+      context <- SpawExact(precise.data=obj@precise.data,
+                           context.id=obj@context.id,
+                           contextual.names=name,
+                           contextual.weight.matrices=weight.matrix)
     } else {
-      columns.extract <- c(name,
-                           obj@individual.weight.name)
-      context.and.weight <- subset(obj@contextual.data, select=columns.extract)
-      names(context.and.weight) <- c('x', 'w')
-      
-      split.context <- split(context.and.weight,
-                             obj@contextual.data[[obj@context.id]])
-      
-      aggregated.context <- matrix(sapply(X=split.context,
-                                          FUN=function(x,y) {do.call(y,x)},
-                                          obj@aggregation.function[[1]]),
-                                   ncol=1)
-      
+      context <- SpawAggregate(
+        contextual.data=obj@contextual.data,
+        context.id=obj@context.id,
+        contextual.names=name,
+        contextual.weight.matrices=weight.matrix,
+        nb.resamples=0,
+        aggregation.functions=obj@aggregation.function,
+        design.weight.names=obj@design.weight.name,
+        additional.args=obj@additional.args)
     }
-    merge.data <- data.frame(1:obj@nb.area)
-    names(merge.data) <- obj@context.id
-    merge.data[[name]] <- aggregated.context
-    if(!is.null(obj@precise.data)) {
-      merge.data <- merge(merge.data, obj@precise.data, by=obj@context.id)
-    }
+
+    ## screw the pooch
+    formula <-
+      as.formula(paste(as.character(obj@formula[2]), '~',
+                       as.character(obj@formula[3]), '+',
+                       name, ".1", sep=""))
+    model <- MLSpawExact(individual.level.data=obj@individual.level.data,
+                         context.id=obj@context.id,
+                         formula=formula,
+                         precise.data=context)
+    output.list[[paste("bandwidth = ", bandwidth)]] <- model
   }
 
-  output.list=list()
-
-  ## loop through multilevel.bandwidths
-  message("performing spacom computations")
-  for (i in 1:length(obj@multilevel.bandwidths)) {
-    multilevel.bandwidth = obj@multilevel.bandwidths[i]
-    
-    ## generate weight matrix
-
-    message("computing spatial weights for bandwidth = ", multilevel.bandwidth)
-    weight.matrix <- performWeights(weight.object, multilevel.bandwidth)
-    message("performing spacom")
-    sml.obj <-
-      new("ResampleAggregateSpawMLObject",
-          individual.level.data=obj@individual.level.data,
-          contextual.data=NULL,
-          precise.data=merge.data,
-          context.id=obj@context.id,
-          contextual.names=obj@contextual.names,
-          aggregation.names=list(),
-          precise.names=obj@contextual.names,
-          individual.weight.names=getHash(obj@contextual.names, NULL),
-          aggregation.functions=list("mean"),
-          contextual.weight.matrices=getHash(obj@contextual.names, weight.matrix),
-          formula=obj@formula,
-          nb.area=obj@nb.area,
-          nb.analyses=as.integer(1),
-          nb.aggregations=as.integer(0),
-          nb.precise.weightings=as.integer(1))
-    output.list[[paste("bandwidth = ", multilevel.bandwidth)]] <-
-      PerformSpawML(sml.obj)
-  }
   return(output.list)
 }
 
-ExploreSpawML <-
+ExploreMLSpawExact <-
+  function(individual.level.data,
+           contextual.name,
+           context.id,
+           formula,
+           distance.matrix,
+           multilevel.bandwidths,
+           precise.data,
+           kernel=NULL)
+{
+obj <-
+  MakeExploreMLSpawObject(
+    individual.level.data=individual.level.data,
+    contextual.name=contextual.name,
+    contextual.data=NULL,
+    precise.data=precise.data,
+    context.id=context.id,
+    formula=formula,
+    distance.matrix=distance.matrix,
+    multilevel.bandwidths=multilevel.bandwidths,
+    design.weight.names=NULL,
+    aggregation.function="weighted.mean",
+    kernel=kernel,
+    additional.args=NULL)
+  output.obj <- performExploreMLSpaw(obj)
+}
+
+ExploreMLSpawAggregate <-
   function(individual.level.data,
            contextual.name,
            contextual.data,
@@ -193,22 +197,24 @@ ExploreSpawML <-
            formula,
            distance.matrix,
            multilevel.bandwidths,
-           precise.data=NULL,
-           individual.weight.names=NULL,
-           aggregation.function="mean",
-           kernel=NULL)
+           design.weight.names=NULL,
+           aggregation.function="weighted.mean",
+           kernel=NULL,
+           additional.args=NULL)
 {
 obj <-
-  MakeExploreSpawMLObject(individual.level.data,
-                                contextual.name,
-                                contextual.data,
-                                precise.data,
-                                context.id,
-                                formula,
-                                distance.matrix,
-                                multilevel.bandwidths,
-                                individual.weight.names,
-                                aggregation.function,
-                                kernel)
-  output.obj <- performExploreSpawML(obj)
+  MakeExploreMLSpawObject(
+    individual.level.data=individual.level.data,
+    contextual.name=contextual.name,
+    contextual.data=contextual.data,
+    precise.data=NULL,
+    context.id=context.id,
+    formula=formula,
+    distance.matrix=distance.matrix,
+    multilevel.bandwidths=multilevel.bandwidths,
+    design.weight.names=design.weight.names,
+    aggregation.function=aggregation.function,
+    kernel=kernel,
+    additional.args=additional.args)
+  output.obj <- performExploreMLSpaw(obj)
 }

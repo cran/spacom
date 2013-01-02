@@ -1,6 +1,6 @@
 ################################################################################
 ################################################################################
-## author Till Junge <till.junge@unil.ch>                                     ##
+## author Till Junge <till.junge@gmail.com>                                   ##
 ##                                                                            ##
 ## Copyright (c) UNIL (Universite de Lausanne)                                ##
 ## NCCR - LIVES (National Centre of Competence in Research "LIVES –           ##
@@ -30,71 +30,31 @@ setClass("MultiKeyHash",
 
 ## Definition of an object containing everything needed to run a weighted multi-
 ## level analysis
-setClass("SpawMLObject",
+setClass("MLSpawExactObject",
          representation(## data frame containing the individual level data.
-                        ## data in frame must be numeric (logical, integer, or plain numeric)
-                        ## there may not be any missing values, NaN's, NULL's or NA's
+                        ## data in frame must be numeric (logical, integer, or
+                        ## plain numeric).
+                        ## there may not be any missing values, NaN's, NULL's or
+                        ## NA's
                         individual.level.data="data.frame",
-
-                        ## data frame containing the contextual data on individual level
-                        ## may be NULL, in which case the individual data is used
-                        ## data in frame must be numeric (logical, integer, or plain numeric)
-                        ## there may not be any missing values, NaN's, NULL's or NA's
-                        contextual.data="ANY",
 
                         ## data frame containing the precise contextual data.
                         ## May be NULL, but may not contain any missing values
                         ## like NaN's, NULL's or NA's
-                        precise.data="ANY",
+                        precise.data="data.frame",
 
-                        ## Name of the dataframe column which contains aggregation unit id's
+                        ## Name of the dataframe column which contains
+                        ## aggregation unit id's
                         context.id="character",
 
-                        ## list of contextual variable names to be weighted
-                        contextual.names="list",
-
-                        ## list of contextual variable names to be weighted
-                        aggregation.names="list",
-
-                        ## list of contextual variable names to be weighted
-                        precise.names="list",
-
                         ## list of optional design weights at the individual
-                        ## level used for aggregation. List must have same
-                        ## length as contextual.names. May contain NULL's for
-                        ## variables which should not be weighted at the indivi-
-                        ## dual level
-                        individual.weight.names="MultiKeyHash",
-
-                        ## list of aggregation functions. functions take either
-                        ## a) 1 argument in which case the corresponding design
-                        ##    weight is NULL
-                        ## b) 2 arguments in which case the second argument is
-                        ##    taken from the corresponding design weight
-                        aggregation.functions="list",
-
-                        ## list of weights to apply to contextual variables
-                        ## list must have same length as contextual.names
-                        ## may contain NULL's for variables which should not be
-                        ## weighted at the contextual level
-                        contextual.weight.matrices="MultiKeyHash",
-
                         ## formula description of the model
                         formula="formula",
 
-                        ## number of upper level units
-                        nb.area="integer",
-
                         ## number of analyses to perform
-                        nb.analyses="integer",
+                        nb.analyses="integer"))
 
-                        ## number of analyses to perform
-                        nb.aggregations="integer",
-
-                        ## number of analyses to perform
-                        nb.precise.weightings="integer"))
-
-setClass("SpawMLOutput",
+setClass("MLSpawExactOutput",
          representation(## the mer object of the lme4 analysis
                         lme="mer",
 
@@ -114,7 +74,9 @@ setClass("weightsObject",
                         moran="logical"))
 
 
-setClass(Class="DescribeExactObject",
+setClass(Class="SpawExactObject",
+         ## This object contains more than the minimum necessary to run
+         ## SpawExact
          representation(##data frame containing the contextual data on individu-
                         ## al level data in frame must be numeric (logical,
                         ## integer, or plain numeric) there may not be any mis-
@@ -127,37 +89,61 @@ setClass(Class="DescribeExactObject",
                         ## tion unit id's
                         context.id="character",
 
-                        ## list of contextual variable names to be weighted
+                        ## Name of the (perhaps) automatically generated
+                        ## numbering of contextual units
+                        numeric.context.id="character",
+
+                        ## contexts
+                        unique.context.ids="ANY",
+
+                        ## list of contextual variable names to be weighted.
+                        ## they can be from either contextual.data or
+                        ## precise.data
                         contextual.names="list",
-                        
+
                         ## list of contextual variable names to be weighted
+                        ## the part of the contextual.names list which refers
+                        ## to contextual.data
                         aggregation.names="list",
 
                         ## list of contextual variable names to be weighted
+                        ## the part of the contextual.names list which refers
+                        ## to precise.data
                         precise.names="list",
 
                         ## number of upper level units
                         nb.area="integer",
 
-                        ## number of analyses to perform
-                        nb.analyses="integer",
+                        ## number of weightings to perform in total
+                        nb.analyses="integer", # i.e. length of contextual.names
 
-                        ## number of analyses to perform
+                        ## number of weightings to perform on contextual.data
                         nb.aggregations="integer",
 
-                        ## number of analyses to perform
+                        ## number of weightings to perform on precise.data
                         nb.precise.weightings="integer",
 
                         ## list of weights to apply to contextual variables
                         ## list must have same length as contextual.names
                         ## may contain NULL's for variables which should not be
                         ## weighted at the contextual level
-                        contextual.weight.matrices="MultiKeyHash"))
+                        contextual.weight.matrices="MultiKeyHash",
+
+                        ## list of population weights to be applied
+                        population.weight.names="MultiKeyHash")
+         )
+
+
+
+
+
+
 
 ## Definition of an input object for desc when the contextual input is
 ## at the individual level
-setClass(Class="DescribeAggregateObject",
-         representation(## number of resamples to be evaluated
+setClass(Class="SpawAggregateObject",
+         representation(## number of resamples to be evaluated.
+                        ## if zero, no boot strapping is performed
                         nb.resamples="integer",
 
                         ## list of aggregation functions. functions take either
@@ -176,7 +162,7 @@ setClass(Class="DescribeAggregateObject",
                         ## length as contextual.names. May contain NULL's for
                         ## variables which should not be weighted at the indivi-
                         ## dual level
-                        individual.weight.names="MultiKeyHash",
+                        design.weight.names="MultiKeyHash",
 
                         ## sample seed is one of four things
                         ## a) NULL, in which case whatever the current random
@@ -190,21 +176,108 @@ setClass(Class="DescribeAggregateObject",
                         ## d) a list of samples. The user will most probably ne-
                         ##    ver use this option. It exists in order to avoid
                         ##    to redo sampling
+                        sample.seed="ANY",
+
+                        ## list of lists additional argument columns to be
+                        ## passed to the aggregation function. e.g. group
+                        ## identifiers. If one aggregation function takes
+                        ## several additional arguments, pack them in lists,
+                        ## e.g. list("group_id", list("group_id", "gender"))
+                        ## for one aggregation function taking "group_id" as
+                        ## additional argument and one taking both ("group_id"
+                        ## and "gender")
+                        additional.args="MultiKeyHash"),
+         contains=c("SpawExactObject"))
+
+
+
+
+
+
+setClass(Class="DescribeExactObjectLocal",
+         representation(##data frame containing the contextual data on individu-
+                        ## al level data in frame must be numeric (logical,
+                        ## integer, or plain numeric) there may not be any mis-
+                        ## sing values, NaN's, NULL's or NA's
+                        contextual.data="data.frame",
+
+                        ## precise.data="NULL",
+
+                        ## Name of the dataframe column which contains aggrega-
+                        ## tion unit id's
+                        context.id="character",
+
+                        ## list of contextual variable names to be weighted
+                        contextual.names="list",
+
+                        ## number of upper level units
+                        nb.area="integer",
+
+                        ## number of analyses to perform
+                        nb.analyses="integer",
+
+                        ## list of weights to apply to contextual variables
+                        ## list must have same length as contextual.names
+                        ## may contain NULL's for variables which should not be
+                        ## weighted at the contextual level
+                        weight.matrices="list",
+
+                        aggregation.functions="list",
+
+                        design.weight="character",
+
+                        groups.name= "character", # ???
+                        groups.number = "integer",
+                        groups.id = "ANY"
+                        ))
+
+
+
+## Definition of an input object for desc when the contextual input is
+## at the individual level
+setClass(Class="DescribeAggregateObjectLocal",
+         representation(## number of resamples to be evaluated
+                        nb.resamples="integer",
+
+                        ## list of aggregation functions. functions take either
+                        ## a) 1 argument in which case the corresponding design
+                        ##    weight is NULL
+                        ## b) 2 arguments in which case the second argument is
+                        ##    taken from the corresponding design weight
+                        percentiles="numeric",
                         sample.seed="ANY"),
-         contains=c("DescribeExactObject"))
-## Definition of an output object for DescribeAggregate
-setClass(Class="DescribeAggregateOutput",
+
+         contains=c("DescribeExactObjectLocal"))
+
+
+
+
+
+
+
+
+## Definition of an output object for SpawAggregate
+setClass(Class="SpawAggregateOutput",
          representation(## sample seed to be reused later
-                        seed="integer",
+                        seed="ANY",
 
                         ## list of matrices per variable each containing the
-                        ## aggregated contexts per sample for a contextual variable
+                        ## aggregated contexts per sample for a contextual
+                        ## variable
                         aggregated.samples="list",
 
                         ## list of output data.frames
                         frames="list"))
 
-setClass("SpawMLResidMoranObject",
+
+
+
+
+
+
+
+
+setClass("MoranObject",
          representation(## random effect matrix
                         ranefs="matrix",
 
@@ -227,10 +300,10 @@ setClass("SpawMLResidMoranObject",
 
 ## Definition of an object containing everything needed to run a resampled
 ## weighted multilevel analysis
-setClass("ResampleExactSpawMLObject",
+setClass("ResampleMLSpawExactObject",
          representation(## number of resamples to be evaluated
                         nb.resamples="integer",
-                        
+
                         ## sample seed is one of four things
                         ## a) NULL, in which case whatever the current random
                         ##    seed is is used
@@ -250,11 +323,11 @@ setClass("ResampleExactSpawMLObject",
                         percentiles="numeric"
 
                         ),
-         contains=c("SpawMLObject"))
+         contains=c("MLSpawExactObject"))
 
 
 ## Definition of an output object for describeResampledBothContext
-setClass(Class="ResampleExactSpawMLOutput",
+setClass(Class="ResampleMLSpawOutput",
          representation(## individual.samples to be reused later
                         individual.sample.seed="integer",
 
@@ -279,30 +352,44 @@ setClass(Class="ResampleExactSpawMLOutput",
 
 ## Definition of an object containing everything needed to run a resampled
 ## weighted multilevel analysis
-setClass("ResampleAggregateSpawMLObject",
-         representation(## sample seed is one of four things
-                        ## a) NULL, in which case whatever the current random
-                        ##    seed is is used
-                        ## b) an integer, which will be used to set the random
-                        ##    seed. this allows reproducible random samples
-                        ## c) a saved .Random.seed this allows reproducible
-                        ##    random samples as well. The reason why both b) and
-                        ##    c) are present is because .Random.seed can be
-                        ##    saved a posteriori
-                        ## d) a list of samples. The user will most probably ne-
-                        ##    ver use this option. It exists in order to avoid
-                        ##    to redo sampling
-                        contextual.sample.seed="ANY",
+setClass("ResampleMLSpawAggregateObject",
+         representation(## The bootstrapped context in form of a
+                        ## SpawAggregateOutput object,
+                        aggregates="SpawAggregateOutput"),
+         contains=c("ResampleMLSpawExactObject"))
 
-                        ## boolean for internal use of the package creator
-                        same.survey="logical"),
-         contains=c("ResampleExactSpawMLObject"))
 
-## Definition of an output object for describeResampledBothContext
-setClass(Class="ResampledSpawMLOutput",
-         representation(## contextual.samples to be reused later
-                        contextual.sample.seed="integer"),
-         contains=c("ResampleExactSpawMLOutput"))
+
+
+
+
+ setClass("ResampleMLSpawAggregateresultObject",
+         representation(
+                        nb.resamples = "integer",
+                        precise.frame = "data.frame",
+                        individual.data = "data.frame",
+                        formula="formula",
+                        fixed.effect.formula="formula",
+                        context.id = "character",
+                        nb.area = "integer",
+                        percentiles = "numeric",
+                        liste = "list" )
+          )
+
+
+
+
+
+
+
+
+
+
+## ## Definition of an output object for describeResampledBothContext
+## setClass(Class="ResampledMLSpawExactOutput",
+##          representation(## contextual.samples to be reused later
+##                         contextual.sample.seed="integer"),
+##          contains=c("ResampleMLSpawExactOutput"))
 
 
 
@@ -314,10 +401,10 @@ setClass(Class="ResampleExploreSpawML",
                         ## there may not be any missing values, NaN's, NULL's
                         ## or NA's
                         individual.level.data="data.frame",
-                        
+
                         ## list of 1 contextual variable name to be weighted
                         contextual.names="list",
-                        
+
                         ## data frame containing the contextual data on indivi-
                         ## dual level may be NULL, in which case the individual
                         ## data is used data in frame must be numeric (logical,
@@ -328,7 +415,7 @@ setClass(Class="ResampleExploreSpawML",
 
                         ## number of resamples
                         nb.resamples="integer",
-                        
+
                         ## Name of the dataframe column which contains aggrega-
                         ## tion unit id's
                         context.id="character",
@@ -347,7 +434,7 @@ setClass(Class="ResampleExploreSpawML",
                         moron.bandwidths="ANY",
 
                         ## optional design weight name
-                        individual.weight.name="ANY",
+                        design.weight.name="ANY",
 
                         ## aggregation function
                         aggregation.function="ANY",
@@ -384,7 +471,7 @@ setClass(Class="ExploreSpawML",
                         ## there may not be any missing values, NaN's, NULL's
                         ## or NA's
                         individual.level.data="data.frame",
-                        
+
                         ## list of 1 contextual variable name to be weighted
                         contextual.names="list",
 
@@ -403,7 +490,7 @@ setClass(Class="ExploreSpawML",
 
                         ## number of resamples
                         nb.resamples="integer",
-                        
+
                         ## Name of the dataframe column which contains aggrega-
                         ## tion unit id's
                         context.id="character",
@@ -419,7 +506,7 @@ setClass(Class="ExploreSpawML",
                         multilevel.bandwidths="numeric",
 
                         ## optional design weight name
-                        individual.weight.name="ANY",
+                        design.weight.name="ANY",
 
                         ## aggregation function
                         aggregation.function="ANY",
@@ -436,7 +523,17 @@ setClass(Class="ExploreSpawML",
 
 
                         ## kernel function for proximity weighting
-                        kernel="function"))
+                        kernel="function",
+
+                        ## list of lists additional argument columns to be
+                        ## passed to the aggregation function. e.g. group
+                        ## identifiers. If one aggregation function takes
+                        ## several additional arguments, pack them in lists,
+                        ## e.g. list("group_id", list("group_id", "gender"))
+                        ## for one aggregation function taking "group_id" as
+                        ## additional argument and one taking both ("group_id"
+                        ## and "gender")
+                        additional.args="ANY"))
 
 
 

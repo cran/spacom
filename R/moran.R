@@ -1,6 +1,6 @@
 ################################################################################
 ################################################################################
-## author Till Junge <till.junge@unil.ch>                                     ##
+## author Till Junge <till.junge@gmail.com>                                   ##
 ##                                                                            ##
 ## Copyright (c) UNIL (Universite de Lausanne)                                ##
 ## NCCR - LIVES (National Centre of Competence in Research "LIVES –           ##
@@ -19,19 +19,27 @@
 ################################################################################
 
 
-makeSpawMLResidMoranObject <- function(srawe.obj, distance.matrix,
-                                 bandwidths, kernel, confidence.intervals) {
-  obj <- new("SpawMLResidMoranObject")
-  if (inherits(srawe.obj, "ResampledSpawMLOutput")) {
-    obj@ranefs <- srawe.obj@ranefs
-  } else if (is(srawe.obj, "matrix")) {
-    obj@ranefs <- srawe.obj
+makeMoranObject <-
+  function(ml.spaw.obj,
+           distance.matrix,
+           bandwidths,
+           kernel,
+           confidence.intervals) {
+  obj <- new("MoranObject")
+  if (is(ml.spaw.obj, "ResampleMLSpawOutput")) {
+    obj@ranefs <- ml.spaw.obj@ranefs
+  } else if (is(ml.spaw.obj, "MLSpawExactOutput")) {
+    obj@ranefs <- as.matrix(ranef(ml.spaw.obj)[[1]])
+  } else if (is(ml.spaw.obj, "matrix")) {
+    obj@ranefs <- ml.spaw.obj
   } else {
-    stop("The parameter 'srawe.obj' has to be either an output object from a ",
-         "resampled weighted mulitlevel analysis or a matrix. You specified an",
-         " object of class '", class(srawe.obj), "'.")
+    stop("The parameter 'ml.spaw.obj' has to be either an output object from ",
+         "any of spacom's MLSpaw methods * or a matrix. You specified ",
+         "an object of class '", class(ml.spaw.obj), "'.\n",
+         "  1) MLSpawExact\n  2) ResampleMLSpawExact\n  ",
+         "3) ResampleMLSpawAggregate")
   }
-  
+
   obj@nb.resamples <- ncol(obj@ranefs)
 
   obj@weights.object <- makeWeightsObject(distance.matrix, kernel, moran=TRUE)
@@ -45,33 +53,47 @@ makeSpawMLResidMoranObject <- function(srawe.obj, distance.matrix,
     obj@percentiles <-
       checkConfidenceIntervals(confidence.intervals, obj@nb.resamples)
   }
-  
+
   return(obj)
 }
 
 
-SpawMLResidMoran <- function(srawe.obj, distance.matrix, bandwidths, kernel=NULL,
-                       confidence.intervals=c(.95)) {
-  obj <- makeSpawMLResidMoranObject(srawe.obj, distance.matrix, bandwidths, kernel,
-                              confidence.intervals)
+MLSpawResidMoran <-
+  function(ml.spaw.obj,
+           distance.matrix,
+           bandwidths,
+           kernel=NULL,
+           confidence.intervals=c(.95)) {
+    obj <- makeMoranObject(
+      ml.spaw.obj=ml.spaw.obj,
+      distance.matrix=distance.matrix,
+      bandwidths=bandwidths,
+      kernel=kernel,
+      confidence.intervals=confidence.intervals)
+
   tmp.matrix <- matrix(nrow=obj@nb.moron, ncol=obj@nb.resamples)
-  row.names(tmp.matrix) <- lapply(bandwidths, FUN=function(x){paste('h.',x,sep='')})
+  row.names(tmp.matrix) <- lapply(bandwidths,
+                                  FUN=function(x){paste('h.',x,sep='')})
   for (row in 1:obj@nb.moron) {
     message("Computing I for bandwidth ", obj@bandwidths[row])
     weight <- performWeights(obj@weights.object, obj@bandwidths[row])
     weight <- apply(weight, 2, "/", rowSums(weight))
+    ordered.ids <- order(colnames(weight))
+    reverse.order <- order(ordered.ids)
     weight <- mat2listw(weight)
     start.time <- proc.time()[3]
+    reordered.ranefs <- as.matrix(obj@ranefs[reverse.order,])
     for (column in 1:obj@nb.resamples) {
-      a <- obj@ranefs[ , column]
+      a <- reordered.ranefs[ , column]
       tmp.matrix[row, column] <-
-        as.numeric(lm.morantest(lm(a~1, data=as.data.frame(obj@ranefs)),
+        as.numeric(lm.morantest(lm(a~1, data=as.data.frame(reordered.ranefs)),
                                 listw=weight)$estimate[1])
       elapsed.time <- proc.time()[3] - start.time
       cat("\rcomputed step ", column, " of ", obj@nb.resamples,
-          ". ETA = ", (obj@nb.resamples/column-1)*elapsed.time)
+          ". ETA = ", as.integer((obj@nb.resamples/column-1)*elapsed.time))
     }
-    cat("\rmoran done                                                         \n")
+    cat(
+      "\rmoran done                                                         \n")
   }
 
   if (ncol(tmp.matrix) > 1) {
@@ -80,7 +102,7 @@ SpawMLResidMoran <- function(srawe.obj, distance.matrix, bandwidths, kernel=NULL
     frame <- data.frame(mean=mu)
      ## compute standard deviation (mandatory)
     frame$sd <- apply(tmp.matrix, 1, sd)
-    
+
     ## compute percentiles
     perc.frame <- t(apply(tmp.matrix, 1, quantile, probs=obj@percentiles))
     return (cbind(frame, perc.frame))
