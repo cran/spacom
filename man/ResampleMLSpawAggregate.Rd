@@ -27,6 +27,7 @@ ResampleMLSpawAggregate(individual.level.data,
  precise.data = NULL,
  confidence.intervals = c(0.95),
  individual.sample.seed = NULL,
+ verbose = TRUE,
  ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -74,6 +75,11 @@ ResampleMLSpawAggregate(individual.level.data,
       \code{.Random.seed} can be saved a posteriori.
     }
     Defaults to \code{NULL}. 
+  }
+
+  \item{verbose}{
+    if \code{TRUE}, progress information and an estimate of the remaining
+    computing time is shown at the screen. Defaults to \code{TRUE}
   }
   \item{...}{
     All additional named arguments are handed through to the function

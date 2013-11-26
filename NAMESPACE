@@ -1,22 +1,27 @@
 
+importFrom("stats", AIC, BIC)# and many more!
+
+importFrom("methods", setClass, representation,
+           setGeneric, setMethod, signature, new)
+
+importFrom("nlme", VarCorr, fixef, ranef)# lme4 also imports and exports them 
+importFrom("lme4", lmer)
+importFrom("spdep", "lm.morantest", "mat2listw")
+importFrom("foreach", foreach, "%do%", "%dopar%")
+importFrom("iterators", nextElem, iter)
+importFrom("Matrix", Matrix, rowSums)
+
 exportMethods(
     "AIC",
     "BIC",
     "fixef",
-    "print",
     "ranef",
     "show",
     "summary",
     "VarCorr",
     "merge"
 )
-
-
-
-importFrom("lme4", "AIC", "BIC", "VarCorr", "fixef", "ranef")
-importFrom("spdep", "lm.morantest", "mat2listw")
-importFrom("foreach", "%do%", "%dopar%")
-importFrom("iterators", "nextElem")
+S3method(print, MLSpawExactOutput)
 
 export("MLSpawExact",
        "ResampleMLSpawExact",

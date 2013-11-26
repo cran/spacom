@@ -28,6 +28,7 @@ MakeResampleMLSpawExactObject <-function(individual.level.data,
                                          confidence.intervals,
                                          nb.resamples,
                                          individual.sample.seed,
+                                         verbose,
                                          obj=NULL) {
 
   ## create an empty ResampleMLSpawExactObject to fill, using the
@@ -40,6 +41,7 @@ MakeResampleMLSpawExactObject <-function(individual.level.data,
                           context.id=context.id,
                           formula=formula,
                           precise.data=precise.data,
+                          verbose=verbose,
                           obj)
 
   ## makes sure the number of resamples is a positive integer
@@ -157,8 +159,10 @@ PerformResampleMLSpawExact <- function(obj, ...){
               lme <- PerformMLSpawExact(sml.obj, ...)
               fillMatrices(lme@lme, lme@beta, column)
               elapsed.time <- proc.time()[3] - start.time
-              cat("\rcomputed step ", column, " of ", obj@nb.resamples,
-                  ". ETA = ", as.integer((obj@nb.resamples/column-1)*elapsed.time))
+              if (obj@verbose){
+                cat("\rcomputed step ", column, " of ", obj@nb.resamples,
+                    ". ETA = ", as.integer((obj@nb.resamples/column-1)*elapsed.time))
+              }
               NULL
             }
 
@@ -189,6 +193,7 @@ ResampleMLSpawExact <-function(individual.level.data,
                                confidence.intervals=c(.95),
                                nb.resamples=1000,
                                individual.sample.seed=NULL,
+                               verbose=TRUE,
                                ...) {
   obj <-
     MakeResampleMLSpawExactObject(individual.level.data = individual.level.data,
@@ -197,7 +202,8 @@ ResampleMLSpawExact <-function(individual.level.data,
                                   precise.data = precise.data,
                                   confidence.intervals = confidence.intervals,
                                   nb.resamples = nb.resamples,
-                                  individual.sample.seed=individual.sample.seed)
+                                  individual.sample.seed=individual.sample.seed,
+                                  verbose=verbose)
   model <- PerformResampleMLSpawExact(obj,...)
 }
 

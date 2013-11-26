@@ -22,12 +22,13 @@ MLSpawResidMoran(ml.spaw.obj,
                  distance.matrix,
                  bandwidths,
                  kernel = NULL,
-                 confidence.intervals = c(0.95)) 
+                 confidence.intervals = c(0.95),
+                 verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{ml.spaw.obj}{
-    \code{ResampleMLSpawOutput}, 
+    \code{ResampleMLSpawOutput},
     \code{MLSpawExactOutput},
     or matrix of residuals}
 \item{distance.matrix}{
@@ -51,6 +52,11 @@ MLSpawResidMoran(ml.spaw.obj,
   \code{vector} of conficence intervals. Defaults  to \code{c(.95)}
   which corresponds to 95 \%.
 }
+
+\item{verbose}{
+  if \code{TRUE}, progress information and an estimate of the remaining
+  computing time is shown at the screen. Defaults to \code{TRUE}
+  }
 }
 \value{
   A \code{matrix} containing Moran's I's

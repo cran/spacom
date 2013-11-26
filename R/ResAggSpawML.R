@@ -27,7 +27,8 @@ MakeResampleMLSpawAggregateObject <-function(individual.level.data,
                                              aggregates,
                                              precise.data=NULL,
                                              confidence.intervals,
-                                             individual.sample.seed=NULL) {
+                                             individual.sample.seed=NULL,
+                                             verbose) {
   ## check the aggregates input object
   if (!is(aggregates, "SpawAggregateOutput")) {
     stop("The input parameter 'aggregates' has to be of type ",
@@ -49,6 +50,7 @@ MakeResampleMLSpawAggregateObject <-function(individual.level.data,
                                   confidence.intervals,
                                   nb.resamples=nb.resamples,
                                   individual.sample.seed=individual.sample.seed,
+                                  verbose,
                                   obj=new("ResampleMLSpawAggregateObject"))
 
   obj@aggregates <- aggregates
@@ -62,17 +64,19 @@ ResampleMLSpawAggregate <-function(individual.level.data,
                                    precise.data=NULL,
                                    confidence.intervals=c(.95),
                                    individual.sample.seed=NULL,
+                                   verbose=TRUE,
                                    ...) {
   obj <-
     MakeResampleMLSpawAggregateObject(individual.level.data =
-                                        individual.level.data,
+                                      individual.level.data,
                                       context.id=context.id,
                                       formula=formula,
                                       aggregates=aggregates,
                                       precise.data=precise.data,
                                       confidence.intervals=confidence.intervals,
                                       individual.sample.seed=
-                                        individual.sample.seed)
+                                      individual.sample.seed,
+                                      verbose=verbose)
   model <- PerformResampleMLSpawAggregate(obj,...)
 }
 
@@ -130,8 +134,10 @@ PerformResampleMLSpawAggregate <- function(obj, ...){
         lme <- PerformMLSpawExact(sml.obj, ...)
         fillMatrices(lme@lme, lme@beta, column)
         elapsed.time <- proc.time()[3]-start.time
-        cat("\rcomputed step ", column, " of ", obj@nb.resamples,
-            ". ETA = ", as.integer((obj@nb.resamples/column-1)*elapsed.time))
+        if (obj@verbose) {
+            cat("\rcomputed step ", column, " of ", obj@nb.resamples,
+                ". ETA = ", as.integer((obj@nb.resamples/column-1)*elapsed.time))
+        }
         NULL
     }
   cat("\rspacom done                                                        \n")

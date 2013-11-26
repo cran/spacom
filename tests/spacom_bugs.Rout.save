@@ -1,7 +1,6 @@
 
-R version 2.15.2 (2012-10-26) -- "Trick or Treat"
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
+R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
+Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -17,56 +16,6 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(spacom)
-Loading required package: spdep
-Loading required package: sp
-Loading required package: boot
-Loading required package: Matrix
-Loading required package: lattice
-
-Attaching package: 'lattice'
-
-The following object(s) are masked from 'package:boot':
-
-    melanoma
-
-
-Attaching package: 'Matrix'
-
-The following object(s) are masked from 'package:stats':
-
-    toeplitz
-
-Loading required package: MASS
-Loading required package: nlme
-Loading required package: maptools
-Loading required package: foreign
-Loading required package: grid
-Checking rgeos availability: TRUE
-Loading required package: deldir
-deldir 0.0-21
-Loading required package: coda
-Loading required package: splines
-Loading required package: foreach
-Loading required package: lme4
-
-Attaching package: 'lme4'
-
-The following object(s) are masked from 'package:coda':
-
-    HPDinterval
-
-The following object(s) are masked from 'package:nlme':
-
-    VarCorr, lmList
-
-The following object(s) are masked from 'package:stats':
-
-    AIC, BIC
-
-Loading required package: classInt
-Loading required package: class
-Loading required package: e1071
-Loading required package: iterators
 > 
 > 
 > #### new tests on the test data
@@ -100,13 +49,14 @@ Loading required package: iterators
 +                        aggregation.functions="weighted.mean",
 +                        design.weight.names=NULL,
 +                        nb.resamples=2,
-+                        sample.seed=1)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                        sample.seed=1,
++                        verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
-> # gives back:
-> # CORRECTed: Error in 1:matrix.size : argument of length 0
+> ## gives back:
+> ## CORRECTed: Error in 1:matrix.size : argument of length 0
 > 
 > ##### CORRECT
 > 
@@ -118,12 +68,13 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 +                          aggregation.functions="mean",
 +                          design.weight.names=NULL,
 +                          nb.resamples=2,
-+                          sample.seed=1)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                          sample.seed=1,
++                          verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
-> # gives back the same error message
+> ## gives back the same error message
 > 
 > if (!identical(test1, test1.1)) {
 +   stop("should be identical")
@@ -133,7 +84,7 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 [1] "all good"
 > 
 > 
-> # CORRECT
+> ## CORRECT
 > 
 > ######################
 > ## additionaly, if I misspecify contex.id (I put "area" instead of "area.name") returns differentresults (the same value for each context)
@@ -145,8 +96,9 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 +                        aggregation.functions="mean",
 +                        design.weight.names=NULL,
 +                        nb.resamples=2,
-+                        sample.seed=1)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                        sample.seed=1,
++                        verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
@@ -183,40 +135,42 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 > 
 > ### 2. SpawAggregate doesn't work with contextual.weight.matrices=NULL
 > agg.test3 <- SpawAggregate(contextual.data=traces_event,
-+                           context.id="area.name",
-+                           contextual.names="w_all",
-+                           contextual.weight.matrices=NULL,
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names="weight",
-+                           nb.resamples=2)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                            context.id="area.name",
++                            contextual.names="w_all",
++                            contextual.weight.matrices=NULL,
++                            aggregation.functions="weighted.mean",
++                            design.weight.names="weight",
++                            nb.resamples=2,
++                            verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
-> # gives back:
-> # CORRECT: Error in 1:matrix.size : argument of length 0
+> ## gives back:
+> ## CORRECT: Error in 1:matrix.size : argument of length 0
 > 
 > ###  It seems to work if contextual.weight.matrices are specified, but individual.weight.names=NULL
 > agg.test3.1 <- SpawAggregate(contextual.data=traces_event,
-+                           context.id="area.name",
-+                           contextual.names="w_all",
-+                           contextual.weight.matrices=geow.50,
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names=NULL,
-+                           nb.resamples=2,
-+                           sample.seed=10)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                              context.id="area.name",
++                              contextual.names="w_all",
++                              contextual.weight.matrices=geow.50,
++                              aggregation.functions="weighted.mean",
++                              design.weight.names=NULL,
++                              nb.resamples=2,
++                              sample.seed=10,
++                              verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
-> # CORRECT
+> ## CORRECT
 > ## check with till how i can compare results with mathieu's commands
 > 
 > 
 > #### 2. Misspecified context.id (I use "area" which is 1:80, while in the weight matrix colnames are string)
 > 
-> # previous example (agg.test3.1) with "area" gives back results (but should give an error msg - contex.id is not the same as colnames)
-> # furhermore, if agg.test3.1 are correct, then misspecifying gives back wrong results (and no error msg!)
+> ## previous example (agg.test3.1) with "area" gives back results (but should give an error msg - contex.id is not the same as colnames)
+> ## furhermore, if agg.test3.1 are correct, then misspecifying gives back wrong results (and no error msg!)
 > tryCatch(
 +   {
 +     agg.test3.2 <- SpawAggregate(contextual.data=traces_event,
@@ -226,74 +180,78 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 +                                  aggregation.functions="weighted.mean",
 +                                  design.weight.names=NULL,
 +                                  nb.resamples=2,
-+                                  sample.seed=10)
++                                  sample.seed=10,
++                                  verbose=FALSE)
 +     stop("Shouldn't have been able to reach this point")
 +   }, error=function(er) {print("caught this error:");
-+                        print(er)})
++                          print(er)})
 [1] "caught this error:"
-<simpleError in MakeSpawExactObject(contextual.data = contextual.data, context.id = context.id,     contextual.names = contextual.names, contextual.weight.matrices = contextual.weight.matrices,     population.weight.names = NULL, obj = new("SpawAggregateObject")): The column names in the weight matrices do not correspond to the context identifiers. Your context ids must all appear in the column names of the weight matrix
+<simpleError in MakeSpawExactObject(contextual.data = contextual.data, context.id = context.id,     contextual.names = contextual.names, contextual.weight.matrices = contextual.weight.matrices,     population.weight.names = NULL, verbose, obj = new("SpawAggregateObject")): The column names in the weight matrices do not correspond to the context identifiers. Your context ids must all appear in the column names of the weight matrix
 >
 > 
 > 
-> #cbind(agg.test3.1@frames$w_all.1$mean, agg.test3.2@frames$w_all.1$mean)
+> ##cbind(agg.test3.1@frames$w_all.1$mean, agg.test3.2@frames$w_all.1$mean)
 > 
 > #### CORRECT
 > 
 > #### check what happens if both weights are correctly specified
 > agg.test3.3 <- SpawAggregate(contextual.data=traces_event,
-+                           context.id="area.name",
-+                           contextual.names="w_all",
-+                           contextual.weight.matrices=geow.50,
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names="weight",
-+                           nb.resamples=2,
-+                           sample.seed=10)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                              context.id="area.name",
++                              contextual.names="w_all",
++                              contextual.weight.matrices=geow.50,
++                              aggregation.functions="weighted.mean",
++                              design.weight.names="weight",
++                              nb.resamples=2,
++                              sample.seed=10,
++                              verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
 > 
-> #agg.test3.4 <- SpawAggregate(contextual.data=traces_event,
-> #                          context.id="area",
-> #                          contextual.names="w_all",
-> #                          contextual.weight.matrices=geow.50,
-> #                          aggregation.functions="weighted.mean",
-> #                          design.weight.names="weight",
-> #                          nb.resamples=2,
-> #                          sample.seed=10)
-> #cbind(agg.test3.3@frames$w_all.1$mean, agg.test3.4@frames$w_all.1$mean)
+> ##agg.test3.4 <- SpawAggregate(contextual.data=traces_event,
+> ##                          context.id="area",
+> ##                          contextual.names="w_all",
+> ##                          contextual.weight.matrices=geow.50,
+> ##                          aggregation.functions="weighted.mean",
+> ##                          design.weight.names="weight",
+> ##                          nb.resamples=2,
+> ##                          sample.seed=10)
+> ##cbind(agg.test3.3@frames$w_all.1$mean, agg.test3.4@frames$w_all.1$mean)
 > 
 > ### still gives different results
 > 
 > ######## check does sample.seed works
 > agg.test3.5 <- SpawAggregate(contextual.data=traces_event,
-+                           context.id="area.name",
-+                           contextual.names="w_all",
-+                           contextual.weight.matrices=geow.50,
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names="weight",
-+                           nb.resamples=2,
-+                           sample.seed=10)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                              context.id="area.name",
++                              contextual.names="w_all",
++                              contextual.weight.matrices=geow.50,
++                              aggregation.functions="weighted.mean",
++                              design.weight.names="weight",
++                              nb.resamples=2,
++                              sample.seed=10,
++                              verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
 > 
 > identical(agg.test3.3, agg.test3.5)
 [1] TRUE
-> # TRUE
+> ## TRUE
 > 
 > ###### 3. CORRECT: In SpawAggregate aggregation.functions is by default set to "mean", should be "weighted.mean"
 > 
 > ###### 4. check if nb.resamples=0 works
 > agg.test3.6 <- SpawAggregate(contextual.data=traces_event,
-+                           context.id="area.name",
-+                           contextual.names="w_all",
-+                           contextual.weight.matrices=geow.50,
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names="weight",
-+                           nb.resamples=0)
-computed step  1  of  0 . ETA =  0description done                                                   
++                              context.id="area.name",
++                              contextual.names="w_all",
++                              contextual.weight.matrices=geow.50,
++                              aggregation.functions="weighted.mean",
++                              design.weight.names="weight",
++                              nb.resamples=0,
++                              verbose=FALSE)
+description done                                                   
 > 
 > ## it does
 > 
@@ -302,13 +260,14 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 > tr_event2 <- traces_event[traces_event$area.name != "LJ",]
 > 
 > agg.test3.7 <- SpawAggregate(contextual.data=tr_event2,
-+                           context.id="area.name",
-+                           contextual.names="w_all",
-+                           contextual.weight.matrices=geow.50,
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names="weight",
-+                           nb.resamples=2)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                              context.id="area.name",
++                              contextual.names="w_all",
++                              contextual.weight.matrices=geow.50,
++                              aggregation.functions="weighted.mean",
++                              design.weight.names="weight",
++                              nb.resamples=2,
++                              verbose=FALSE)
+description done                                                   
 Warning messages:
 1: In MakeSpawExactObject(contextual.data = contextual.data, context.id = context.id,  :
   The following context id(s) appear in the weight matrix but not in the data: 'LJ'. Please make sure this is what you want
@@ -317,7 +276,7 @@ Warning messages:
 > 
 > ### CHECK: doesn't give an error message
 > 
-> # one value wrong in context.id
+> ## one value wrong in context.id
 > 
 > tr_event3 <- traces_event
 > tr_event3$area.name[tr_event3$area.name=="LJ"] <- "bla"
@@ -330,16 +289,17 @@ Warning messages:
 +                                  contextual.weight.matrices=geow.50,
 +                                  aggregation.functions="weighted.mean",
 +                                  design.weight.names="weight",
-+                                  nb.resamples=2)
++                                  nb.resamples=2,
++                                  verbose=FALSE)
 +     stop("Shouldn't have been able to reach this point")
 +   }, error=function(er) {print("caught this error:"); print(er)}
 +   )
 [1] "caught this error:"
-<simpleError in MakeSpawExactObject(contextual.data = contextual.data, context.id = context.id,     contextual.names = contextual.names, contextual.weight.matrices = contextual.weight.matrices,     population.weight.names = NULL, obj = new("SpawAggregateObject")): The column names in the weight matrices do not correspond to the context identifiers. Your context ids must all appear in the column names of the weight matrix
+<simpleError in MakeSpawExactObject(contextual.data = contextual.data, context.id = context.id,     contextual.names = contextual.names, contextual.weight.matrices = contextual.weight.matrices,     population.weight.names = NULL, verbose, obj = new("SpawAggregateObject")): The column names in the weight matrices do not correspond to the context identifiers. Your context ids must all appear in the column names of the weight matrix
 >
 > 
-> # gives error message:The column names in the weight matrices do not correspont to the context identifiers
-> # change to correspond
+> ## gives error message:The column names in the weight matrices do not correspont to the context identifiers
+> ## change to correspond
 > 
 > ### give back missing values
 > 
@@ -349,25 +309,27 @@ Warning messages:
 > ### CORRECT: doesn recognize functions wt.gini.categ and wt.gini.group
 > traces_ind <- na.exclude(traces_ind)
 > agg.test6.5 <- SpawAggregate(contextual.data=traces_ind,
-+                           context.id="area.name",
-+                           contextual.names="male",
-+                           contextual.weight.matrices=geow.50,
-+                           aggregation.functions="wt.gini.categ",
-+                           design.weight.names=NULL,
-+                           nb.resamples=2)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                              context.id="area.name",
++                              contextual.names="male",
++                              contextual.weight.matrices=geow.50,
++                              aggregation.functions="wt.gini.categ",
++                              design.weight.names=NULL,
++                              nb.resamples=2,
++                              verbose=FALSE,)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
 > agg.test6.6 <- SpawAggregate(contextual.data=traces_ind,
-+                           context.id="area.name",
-+                           contextual.names="cg_acc",
-+                           contextual.weight.matrices=geow.50,
-+                           aggregation.functions="wt.gini.group",
-+                           design.weight.names=NULL,
-+                           nb.resamples=2,
-+                           additional.args="male")
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                              context.id="area.name",
++                              contextual.names="cg_acc",
++                              contextual.weight.matrices=geow.50,
++                              aggregation.functions="wt.gini.group",
++                              design.weight.names=NULL,
++                              nb.resamples=2,
++                              additional.args="male",
++                              verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
@@ -375,7 +337,7 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 > ##########################################################################
 > ######## SpawExact
 > 
-> # change argument "contextual.data" to "precise.data"
+> ## change argument "contextual.data" to "precise.data"
 > 
 > 
 > ### 1. different contex.id
@@ -384,24 +346,24 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 +                             context.id="area",
 +                             contextual.names="Homog_00",
 +                             contextual.weight.matrices=geow.50)
-+   stop("shouldn't be able to reach this point")
++    stop("shouldn't be able to reach this point")
 +  }, error=function(er){return(NULL)}
-+ )
++   )
 NULL
 > ## CORRECT: doesn't give error message (should say that column names in weight matrix are different then context.id)
-> # ? does it give correct values?
+> ## ? does it give correct values?
 > 
 > exact.test1.1 <- SpawExact(precise.data=homog_census,
-+                                    context.id="area.name",
-+                                    contextual.names="Homog_00",
-+                                    contextual.weight.matrices=geow.50)
-> #cbind(exact.test1, exact.test1.1)
-> # YES
++                            context.id="area.name",
++                            contextual.names="Homog_00",
++                            contextual.weight.matrices=geow.50)
+> ##cbind(exact.test1, exact.test1.1)
+> ## YES
 > 
 > #### 2. missing context id's or wrong value
-> # same as with DescribeAggregate:
-> # - doesn't give error msg when number of context.id's smaller
-> # - should change error msg that is given when values are different
+> ## same as with DescribeAggregate:
+> ## - doesn't give error msg when number of context.id's smaller
+> ## - should change error msg that is given when values are different
 > 
 > #### check if weight matrix has less areas
 > geow.50.1 <- geow.50[-c(1,2), -c(1,2)]
@@ -421,19 +383,19 @@ NULL
 > 
 > ##### 3. inconsistent rule regarding contextual.weight.matrices=NULL
 > 
-> # CORRECT: if contextual.weight.matrices=NULL, it doesn't work
+> ## CORRECT: if contextual.weight.matrices=NULL, it doesn't work
 > exact.test3 <- SpawExact(precise.data=homog_census,
-+                                    context.id="area.name",
-+                                    contextual.names="Homog_00",
-+                                    contextual.weight.matrices=NULL)
-> # gives error msg Error in 1:matrix.size : argument of length 0
-> # generally, that's okay, because if we don't weight it it is same as original
++                          context.id="area.name",
++                          contextual.names="Homog_00",
++                          contextual.weight.matrices=NULL)
+> ## gives error msg Error in 1:matrix.size : argument of length 0
+> ## generally, that's okay, because if we don't weight it it is same as original
 > 
 > ### however, if NULL is part of the list, it works
 > exact.test3.1 <- SpawExact(precise.data=homog_census,
-+                                    context.id="area.name",
-+                                    contextual.names=c("Homog_00", "Homog_00"),
-+                                    contextual.weight.matrices=list(NULL,geow.50))
++                            context.id="area.name",
++                            contextual.names=c("Homog_00", "Homog_00"),
++                            contextual.weight.matrices=list(NULL,geow.50))
 > 
 > 
 > 
@@ -453,7 +415,7 @@ NULL
 > 
 > ### MLA EXACT
 > 
-> # prepare first spaw exact object
+> ## prepare first spaw exact object
 > 
 > homog.0.50 <- SpawExact(precise.data=homog_census,
 +                         context.id="area.name",
@@ -463,19 +425,20 @@ NULL
 > 
 > 
 > wv.agg <- SpawAggregate(contextual.data=traces_event,
-+                           context.id="area.name",
-+                           contextual.names=c("w_all","w_all"),
-+                           contextual.weight.matrices=list(NULL, geow.50),
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names="weight",
-+                           nb.resamples=0)
-computed step  1  of  0 . ETA =  0description done                                                   
++                         context.id="area.name",
++                         contextual.names=c("w_all","w_all"),
++                         contextual.weight.matrices=list(NULL, geow.50),
++                         aggregation.functions="weighted.mean",
++                         design.weight.names="weight",
++                         nb.resamples=0,
++                         verbose=FALSE)
+description done                                                   
 > colnames(wv.agg)[2:3] <- c("w_all.0", "w_all.50")
-> # merge 2 outputs
+> ## merge 2 outputs
 > cont.data <- merge(homog.0.50, wv.agg, by="area.name")
 > 
 > 
-> # prepare ind level data
+> ## prepare ind level data
 > traces_ind <- na.exclude(traces_ind)
 > 
 > ########### data issues
@@ -486,7 +449,8 @@ NULL
 > ass_test4 <- MLSpawExact(individual.level.data=tr.ind,
 + 						 context.id="area.name",
 + 						 formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+(1|area.name)+w_all.0,
-+ 						 precise.data=cont.data)
++ 						 precise.data=cont.data,
++                          verbose=FALSE)
 Warning message:
 In checkContexts(obj@precise.data[[obj@context.id]], obj@individual.level.data[[obj@context.id]]) :
   The following context id(s) appear in the aggregated data, but not in the individual level data: ''.
@@ -500,7 +464,8 @@ Please make sure this is what you wanted.
 > ass_test5 <- MLSpawExact(individual.level.data=traces_ind,
 + 						 context.id="area.name",
 + 						 formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+(1|area.name)+w_all.0,
-+ 						 precise.data=cont.data.1)
++ 						 precise.data=cont.data.1,
++                          verbose=FALSE)
 Warning message:
 In checkContexts(obj@precise.data[[obj@context.id]], obj@individual.level.data[[obj@context.id]]) :
   The following context id(s) appear in the individual level data, but not in the aggregated data: 'BG'.
@@ -513,7 +478,8 @@ This is almost certainly not what you wanted.
 > ass_test5 <- MLSpawExact(individual.level.data=tr.ind,
 + 						 context.id="area.name",
 + 						 formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+(1|area.name)+w_all.0,
-+ 						 precise.data=cont.data.1)
++ 						 precise.data=cont.data.1,
++                          verbose=FALSE)
 Warning messages:
 1: In checkContexts(obj@precise.data[[obj@context.id]], obj@individual.level.data[[obj@context.id]]) :
   The following context id(s) appear in the individual level data, but not in the aggregated data: 'BG'.
@@ -532,12 +498,13 @@ Please make sure this is what you wanted.
 > ass_test6 <- MLSpawExact(individual.level.data=traces_ind,
 + 						 context.id="area.name",
 + 						 formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+(1|area.name)+w_all.0,
-+ 						 precise.data=cont.data.2)
++ 						 precise.data=cont.data.2,
++                          verbose=FALSE)
 Warning message:
 In PerformMLSpawExact(obj, ...) : There are NA's in your data!
 . This is almost certainly *not* what you wanted. Spacom may not be able to compute standardized coefficients correctly (although it will try).
 
-> # it computes on 76 areas, no error msg, no std coeff for cont var
+> ## it computes on 76 areas, no error msg, no std coeff for cont var
 > 
 > ###### missing values in ind data
 > ind.data.1 <- traces_ind
@@ -546,7 +513,8 @@ In PerformMLSpawExact(obj, ...) : There are NA's in your data!
 > ass_test6 <- MLSpawExact(individual.level.data=ind.data.1,
 + 						 context.id="area.name",
 + 						 formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+(1|area.name)+w_all.0,
-+ 						 precise.data=cont.data)
++ 						 precise.data=cont.data,
++                          verbose=FALSE)
 Warning message:
 In PerformMLSpawExact(obj, ...) : There are NA's in your data!
 . This is almost certainly *not* what you wanted. Spacom may not be able to compute standardized coefficients correctly (although it will try).
@@ -557,4 +525,4 @@ In PerformMLSpawExact(obj, ...) : There are NA's in your data!
 > 
 > proc.time()
    user  system elapsed 
- 13.828   0.192  14.225 
+  9.404   0.144   9.618 

@@ -25,9 +25,9 @@ makeWeightsObject <- function(distance.matrix,
   if (is(distance.matrix, "data.frame")) {
     distance.matrix <- as.matrix(distance.matrix)
   }
-  if (!is(distance.matrix, "matrix")) {
-    stop("The distance matrix has to be of class 'matrix'. You specified an ",
-         "object of class '", class(distance.matrix), "'.")
+  if (!is(distance.matrix, "matrix") && !is(distance.matrix, "Matrix")) {
+    stop("The distance matrix has to be of class 'matrix' or 'Matrix'. You ",
+         "specified an object of class '", class(distance.matrix), "'.")
   }
 
   if (!nrow(distance.matrix) == ncol(distance.matrix)) {
@@ -35,7 +35,7 @@ makeWeightsObject <- function(distance.matrix,
          "size ", nrow(distance.matrix), "x", ncol(distance.matrix))
   }
 
-  obj@distance.matrix <- distance.matrix
+  obj@distance.matrix <- Matrix(distance.matrix)
 
   obj@kernel <- checkKernel(kernel)
 

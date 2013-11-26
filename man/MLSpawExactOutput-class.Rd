@@ -20,25 +20,25 @@ Objects can be created by calls of the form \code{new("MLSpawExactOutput", ...)}
 }
 \section{Slots}{
   \describe{
-    \item{\code{lme}:}{Object of class \code{"mer"} }
+    \item{\code{lme}:}{Object of class \code{"merMod"} }
     \item{\code{beta}:}{Object of class \code{"numeric"} }
   }
 }
 \section{Methods}{
   \describe{
     \item{AIC}{\code{signature(object = "MLSpawExactOutput")}:
-      \code{\link[lme4:mer-class]{mer}} of \pkg{lme4} }
+      \code{\link[lme4:merMod-class]{merMod}} of \pkg{lme4} }
     \item{BIC}{\code{signature(object = "MLSpawExactOutput")}: 
-      \code{\link[lme4:mer-class]{mer}} of \pkg{lme4}  }
+      \code{\link[lme4:merMod-class]{merMod}} of \pkg{lme4}  }
     \item{fixef}{\code{signature(object = "MLSpawExactOutput")}: 
-      \code{\link[lme4:mer-class]{mer}} of \pkg{lme4}  }
+      \code{\link[lme4:merMod-class]{merMod}} of \pkg{lme4}  }
     \item{print}{\code{signature(x = "MLSpawExactOutput")}}
     \item{ranef}{\code{signature(object = "MLSpawExactOutput")}: 
-      \code{\link[lme4:mer-class]{mer}} of \pkg{lme4}  }
+      \code{\link[lme4:merMod-class]{merMod}} of \pkg{lme4}  }
     \item{show}{\code{signature(object = "MLSpawExactOutput")}}
     \item{summary}{\code{signature(object = "MLSpawExactOutput")}}
     \item{VarCorr}{\code{signature(x = "MLSpawExactOutput")}: 
-      \code{\link[lme4:mer-class]{mer}} of \pkg{lme4}  }
+      \code{\link[lme4:merMod-class]{merMod}} of \pkg{lme4}  }
 	 }
 }
 \author{
@@ -82,13 +82,15 @@ class(acc_w100)
 ## to assess standardized coefficients
 acc_w100@beta
 
+## look at the fitted mixed-effect model :
+acc_w100@lme 
 ## to assess non-standardized fixed coefficients
-acc_w100@lme@fixef
+fixef(acc_w100@lme)
 
 ## to assess the deviance of the fitted model
-acc_w100@lme@deviance
+deviance(acc_w100@lme)
 
-## for details about slots within @lme see mer-class{lme4}
+## for details about slots within @lme see   ?merMod-class{lme4}
 }
 \keyword{classes}
 \keyword{spatial}

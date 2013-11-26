@@ -1,7 +1,6 @@
 
-R version 2.15.2 (2012-10-26) -- "Trick or Treat"
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
+R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
+Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -18,56 +17,6 @@ Type 'q()' to quit R.
 
 > #### new tests on the test data
 > library(spacom)
-Loading required package: spdep
-Loading required package: sp
-Loading required package: boot
-Loading required package: Matrix
-Loading required package: lattice
-
-Attaching package: 'lattice'
-
-The following object(s) are masked from 'package:boot':
-
-    melanoma
-
-
-Attaching package: 'Matrix'
-
-The following object(s) are masked from 'package:stats':
-
-    toeplitz
-
-Loading required package: MASS
-Loading required package: nlme
-Loading required package: maptools
-Loading required package: foreign
-Loading required package: grid
-Checking rgeos availability: TRUE
-Loading required package: deldir
-deldir 0.0-21
-Loading required package: coda
-Loading required package: splines
-Loading required package: foreach
-Loading required package: lme4
-
-Attaching package: 'lme4'
-
-The following object(s) are masked from 'package:coda':
-
-    HPDinterval
-
-The following object(s) are masked from 'package:nlme':
-
-    VarCorr, lmList
-
-The following object(s) are masked from 'package:stats':
-
-    AIC, BIC
-
-Loading required package: classInt
-Loading required package: class
-Loading required package: e1071
-Loading required package: iterators
 > 
 > data(d_geo)
 > data(traces_event)
@@ -83,7 +32,7 @@ Loading required package: iterators
 > 
 > ### MLA EXACT
 > 
-> # prepare first spaw exact object
+> ## prepare first spaw exact object
 > 
 > homog.0.50 <- SpawExact(precise.data=homog_census,
 +                         context.id="area.name",
@@ -98,40 +47,44 @@ Loading required package: iterators
 +                         contextual.weight.matrices=list(NULL, geow.50),
 +                         aggregation.functions="weighted.mean",
 +                         design.weight.names="weight",
-+                         nb.resamples=0)
-computed step  1  of  0 . ETA =  0description done                                                   
++                         nb.resamples=0,
++                         verbose=FALSE)
+description done                                                   
 > 
 > colnames(wv.agg)[2:3] <- c("w_all.0", "w_all.50")
-> # merge 2 outputs
+> ## merge 2 outputs
 > cont.data <- merge(homog.0.50, wv.agg, by="area.name")
 > 
 > 
-> # prepare ind level data
+> ## prepare ind level data
 > traces_ind <- na.exclude(traces_ind)
 > 
-> # MlSpawExact
+> ## MlSpawExact
 > ass_test1 <-
 +   MLSpawExact(
 +     individual.level.data=traces_ind,
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
-+       (1|area.name)+w_all.0+homog.0,
-+     precise.data=cont.data)
++     (1|area.name)+w_all.0+homog.0,
++     precise.data=cont.data,
++     verbose=FALSE)
 > ### emypt model
 > ass_test1.1 <-
 +   MLSpawExact(
 +     individual.level.data=traces_ind,
 +     context.id="area.name",
 +     formula=cg_ass~1+(1|area.name),
-+     precise.data=NULL)
++     precise.data=NULL,
++     verbose=FALSE)
 > ### only individual level
 > ass_test1.2 <-
 +   MLSpawExact(
 +     individual.level.data=traces_ind,
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
-+       (1|area.name),
-+     precise.data=NULL)
++     (1|area.name),
++     precise.data=NULL,
++     verbose=FALSE)
 > 
 > ### add lmer argument
 > ass_test2 <-
@@ -139,28 +92,31 @@ Loading required package: iterators
 +     individual.level.data=traces_ind,
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
-+       (1|area.name)+w_all.0+homog.0,
++     (1|area.name)+w_all.0+homog.0,
 +     precise.data=cont.data,
++     verbose=FALSE,
 +     REML=FALSE)
 > 
 > ##### perform Moran on residuals
 > mor.test1 <- MLSpawResidMoran(ml.spaw.obj=ass_test1,
 + 							  distance.matrix=d_geo,
-+ 							  bandwidths=c(25,50,100,200))
++ 							  bandwidths=c(25,50,100,200),
++                               verbose=FALSE)
 Computing I for bandwidth 25
-computed step  1  of  1 . ETA =  0moran done                                                         
+moran done                                                         
 Computing I for bandwidth 50
-computed step  1  of  1 . ETA =  0moran done                                                         
+moran done                                                         
 Computing I for bandwidth 100
-computed step  1  of  1 . ETA =  0moran done                                                         
+moran done                                                         
 Computing I for bandwidth 200
-computed step  1  of  1 . ETA =  0moran done                                                         
+moran done                                                         
+> 
 > print(mor.test1)
               I
-h.25  0.2358705
-h.50  0.2571819
+h.25  0.2358699
+h.50  0.2571815
 h.100 0.2484977
-h.200 0.1791366
+h.200 0.1791367
 > 
 > ############################# CHANGING FORMULA
 > ### add individual level interaction
@@ -169,9 +125,10 @@ h.200 0.1791366
 +     individual.level.data=traces_ind,
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
-+       (1|area.name)+w_all.0 + victim_d:male,
-+     precise.data=cont.data)
-> # everything ok except standardized coef
++     (1|area.name)+w_all.0 + victim_d:male,
++     precise.data=cont.data,
++     verbose=FALSE)
+> ## everything ok except standardized coef
 > 
 > ## add categorical ind level var
 > traces_ind2 <- traces_ind
@@ -184,9 +141,10 @@ h.200 0.1791366
 +     individual.level.data=traces_ind2,
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+ as.factor(edu_all) +
-+       (1|area.name)+ w_all.0,
-+     precise.data=cont.data)
-> # everything ok except standardized coef
++     (1|area.name)+ w_all.0,
++     precise.data=cont.data,
++     verbose=FALSE)
+> ## everything ok except standardized coef
 > 
 > ### random slope
 > ass_test3.2 <-
@@ -195,8 +153,9 @@ h.200 0.1791366
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
 +     cg_acc+ (1 + cg_acc|area.name)+ w_all.0,
-+     precise.data=cont.data)
-> # all okay
++     precise.data=cont.data,
++     verbose=FALSE)
+> ## all okay
 > 
 > ### cross-level interaction
 > ass_test3.3 <-
@@ -205,14 +164,15 @@ h.200 0.1791366
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
 +     cg_acc+ (1 + cg_acc|area.name)+ w_all.0 + cg_acc:w_all.0,
-+     precise.data=cont.data)
-> # everything ok except standardized coef
++     precise.data=cont.data,
++     verbose=FALSE)
+> ## everything ok except standardized coef
 > 
 > 
 > 
 > ########### data issues
 > 
-> # one area missing in individual level data
+> ## one area missing in individual level data
 > tr.ind <- traces_ind[traces_ind$area.name!="LJ",]
 > 
 > ass_test4 <-
@@ -220,8 +180,9 @@ h.200 0.1791366
 +     individual.level.data=tr.ind,
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
-+       (1|area.name)+w_all.0,
-+     precise.data=cont.data)
++     (1|area.name)+w_all.0,
++     precise.data=cont.data,
++     verbose=FALSE)
 Warning message:
 In checkContexts(obj@precise.data[[obj@context.id]], obj@individual.level.data[[obj@context.id]]) :
   The following context id(s) appear in the aggregated data, but not in the individual level data: ''.
@@ -229,7 +190,7 @@ Please make sure this is what you wanted.
 
 > ### doesn't give error message!
 > 
-> # one are missing in contextual level data
+> ## one are missing in contextual level data
 > cont.data.1 <- cont.data[cont.data$area.name!="BG",]
 > 
 > ass_test5 <-
@@ -237,24 +198,26 @@ Please make sure this is what you wanted.
 +     individual.level.data=traces_ind,
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
-+       (1|area.name)+w_all.0,
-+     precise.data=cont.data.1)
++     (1|area.name)+w_all.0,
++     precise.data=cont.data.1,
++     verbose=FALSE)
 Warning message:
 In checkContexts(obj@precise.data[[obj@context.id]], obj@individual.level.data[[obj@context.id]]) :
   The following context id(s) appear in the individual level data, but not in the aggregated data: 'BG'.
 This is almost certainly not what you wanted.
 
-> # it computes, no error message!
+> ## it computes, no error message!
 > 
-> # same number of context areas but different
+> ## same number of context areas but different
 > 
 > ass_test5 <-
 +   MLSpawExact(
 +     individual.level.data=tr.ind,
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
-+       (1|area.name)+w_all.0,
-+     precise.data=cont.data.1)
++     (1|area.name)+w_all.0,
++     precise.data=cont.data.1,
++     verbose=FALSE)
 Warning messages:
 1: In checkContexts(obj@precise.data[[obj@context.id]], obj@individual.level.data[[obj@context.id]]) :
   The following context id(s) appear in the individual level data, but not in the aggregated data: 'BG'.
@@ -264,7 +227,7 @@ This is almost certainly not what you wanted.
   The following context id(s) appear in the aggregated data, but not in the individual level data: 'BG'.
 Please make sure this is what you wanted.
 
-> # computes only on the same ones (n.area=78), doesn't give error msg
+> ## computes only on the same ones (n.area=78), doesn't give error msg
 > 
 > ## missing values in context data
 > cont.data.2 <- cont.data
@@ -275,13 +238,14 @@ Please make sure this is what you wanted.
 +     individual.level.data=traces_ind,
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
-+       (1|area.name)+w_all.0,
-+     precise.data=cont.data.2)
++     (1|area.name)+w_all.0,
++     precise.data=cont.data.2,
++     verbose=FALSE)
 Warning message:
 In PerformMLSpawExact(obj, ...) : There are NA's in your data!
 . This is almost certainly *not* what you wanted. Spacom may not be able to compute standardized coefficients correctly (although it will try).
 
-> # it computes on 76 areas, no error msg, no std coeff for cont var
+> ## it computes on 76 areas, no error msg, no std coeff for cont var
 > 
 > ## missing values in ind data
 > ind.data.1 <- traces_ind
@@ -291,13 +255,14 @@ In PerformMLSpawExact(obj, ...) : There are NA's in your data!
 +   MLSpawExact(individual.level.data=ind.data.1,
 +               context.id="area.name",
 +               formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+
-+                 higher_edu+(1|area.name)+w_all.0,
-+               precise.data=cont.data)
++               higher_edu+(1|area.name)+w_all.0,
++               precise.data=cont.data,
++               verbose=FALSE)
 Warning message:
 In PerformMLSpawExact(obj, ...) : There are NA's in your data!
 . This is almost certainly *not* what you wanted. Spacom may not be able to compute standardized coefficients correctly (although it will try).
 
-> # it computes, but not std coeff
+> ## it computes, but not std coeff
 > 
 > ass_test6.1 <-
 +   MLSpawExact(
@@ -305,7 +270,8 @@ In PerformMLSpawExact(obj, ...) : There are NA's in your data!
 +     context.id="area.name",
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
 +     (1|area.name)+w_all.0,
-+     precise.data=cont.data)
++     precise.data=cont.data,
++     verbose=FALSE)
 > 
 > 
 > 
@@ -313,13 +279,14 @@ In PerformMLSpawExact(obj, ...) : There are NA's in your data!
 > 
 > 
 > wv.0 <- SpawAggregate(contextual.data=traces_event,
-+                           context.id="area.name",
-+                           contextual.names="w_all",
-+                           contextual.weight.matrices=NULL,
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names="weight",
-+                           nb.resamples=2)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                       context.id="area.name",
++                       contextual.names="w_all",
++                       contextual.weight.matrices=NULL,
++                       aggregation.functions="weighted.mean",
++                       design.weight.names="weight",
++                       nb.resamples=2,
++                       verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
@@ -327,13 +294,14 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 > names(wv.0) <- "wv.0"
 > 
 > wv.50 <- SpawAggregate(contextual.data=traces_event,
-+                           context.id="area.name",
-+                           contextual.names="w_all",
-+                           contextual.weight.matrices=geow.50,
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names="weight",
-+                           nb.resamples=2)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                        context.id="area.name",
++                        contextual.names="w_all",
++                        contextual.weight.matrices=geow.50,
++                        aggregation.functions="weighted.mean",
++                        design.weight.names="weight",
++                        nb.resamples=2,
++                        verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
@@ -349,23 +317,25 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 +     individual.level.data=traces_ind,
 +     context.id="area.name",
 +     formula=cg_acc~victim_d+comb_d+male+age_1990+high_school+higher_edu+
-+       (1|area.name)+wv.0+wv.50,
++     (1|area.name)+wv.0+wv.50,
 +     aggregates=cont.agg,
-+     precise.data=NULL)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0spacom done                                                        
++     precise.data=NULL,
++     verbose=FALSE)
+spacom done                                                        
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
 > ## check 2
 > 
 > wv.0.50 <- SpawAggregate(contextual.data=traces_event,
-+                           context.id="area.name",
-+                           contextual.names=c("w_all", "w_all"),
-+                           contextual.weight.matrices=list(NULL, geow.50),
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names="weight",
-+                           nb.resamples=2)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                          context.id="area.name",
++                          contextual.names=c("w_all", "w_all"),
++                          contextual.weight.matrices=list(NULL, geow.50),
++                          aggregation.functions="weighted.mean",
++                          design.weight.names="weight",
++                          nb.resamples=2,
++                          verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
@@ -377,13 +347,14 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 > 
 > 
 > wv.id <- SpawAggregate(contextual.data=traces_event,
-+                           context.id="area.name",
-+                           contextual.names="w_all",
-+                           contextual.weight.matrices=w.id,
-+                           aggregation.functions="weighted.mean",
-+                           design.weight.names="weight",
-+                           nb.resamples=2)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0description done                                                   
++                        context.id="area.name",
++                        contextual.names="w_all",
++                        contextual.weight.matrices=w.id,
++                        aggregation.functions="weighted.mean",
++                        design.weight.names="weight",
++                        nb.resamples=2,
++                        verbose=FALSE)
+description done                                                   
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
@@ -398,12 +369,13 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 +     formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
 +     (1|area.name)+wv.50+wv.id,
 +     aggregates=w.merge,
-+     precise.data=NULL)
-computed step  1  of  2 . ETA =  0computed step  2  of  2 . ETA =  0spacom done                                                        
++     precise.data=NULL,
++     verbose=FALSE)
+spacom done                                                        
 Warning message:
 In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
 > 
 > proc.time()
    user  system elapsed 
- 13.136   0.196  13.466 
+  8.016   0.088   8.118 

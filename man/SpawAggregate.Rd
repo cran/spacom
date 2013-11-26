@@ -28,7 +28,8 @@ SpawAggregate(contextual.data,
  confidence.intervals = 0.95,
  design.weight.names = NULL,
  sample.seed = NULL,
- additional.args = NULL)
+ additional.args = NULL,
+ verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -102,6 +103,11 @@ SpawAggregate(contextual.data,
   addition to the data to aggregate and design weights), they can be
   specified here.
   \code{additional.args} defaults to \code{NULL}
+  }
+
+\item{verbose}{
+  if \code{TRUE}, progress information and an estimate of the remaining
+  computing time is shown at the screen. Defaults to \code{TRUE}
   }
 }
 \details{

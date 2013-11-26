@@ -6,11 +6,11 @@
   Exploratory multilevel analysis with spatially weighted context data
 }
 \description{
-  This exploratory function provides a fast-track procedure, which
-  condenses steps 1 to 3. On the basis of precise contextual measures
+  These exploratory functions provide fast-track procedures, which
+  condense steps 1 to 3. On the basis of precise contextual measures
   and/or micro-level survey data for estimating contextual indicators, a
   distance matrix between contextual units, and individual outcomes and
-  (optional) predictor variables, it directly generate point estimates
+  (optional) predictor variables, it directly generates point estimates
   for regression coefficients of a user-defined multilevel model, for a
   range of different bandwidth values. This function can be used to
   first explore the scale of relevant contextual effects, before
@@ -26,7 +26,8 @@ ExploreMLSpawExact(individual.level.data,
  distance.matrix,
  multilevel.bandwidths,
  precise.data,
- kernel = NULL)
+ kernel = NULL,
+ verbose = TRUE)
 
 ExploreMLSpawAggregate(individual.level.data,
  contextual.name,
@@ -37,7 +38,8 @@ ExploreMLSpawAggregate(individual.level.data,
  design.weight.names = NULL,
  aggregation.function = "weighted.mean",
  kernel = NULL,
- additional.args = NULL)
+ additional.args = NULL,
+ verbose = TRUE)
 }
 \arguments{
   \item{individual.level.data}{
@@ -111,8 +113,12 @@ A \code{data.frame} containing the precise contextual data.There must
   addition to the data to aggregate and design weights), they can be
   specified here.
   \code{additional.args} defaults to \code{NULL}
-  }
+}
 
+\item{verbose}{
+  if \code{TRUE}, progress information and an estimate of the remaining
+  computing time is shown at the screen. Defaults to \code{TRUE}
+  }
 }
 \details{
 \code{ExploreMLSpawExact} performs exploratory multilevel analysis with a precise
