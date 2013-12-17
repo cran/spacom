@@ -25,6 +25,7 @@ MakeMLSpawExactObject <- function(individual.level.data,
                                   context.id,
                                   formula,
                                   precise.data,
+                                  verbose,
                                   obj=NULL) {
 
   ## create an empty MLSpawExactObject to fill
@@ -58,6 +59,8 @@ MakeMLSpawExactObject <- function(individual.level.data,
   ## make sure the formula isn't a string anymore
   obj@formula <- checkFormula(formula)
 
+  ## check verbose flag
+  obj@verbose <- check.flag(verbose, "verbose")
 
   return(obj)
 }
@@ -78,27 +81,24 @@ setMethod("fixef",
 setMethod("ranef",
           signature=c("MLSpawExactOutput"),
           definition=function(object, ...) {lme4::ranef(object@lme, ...)})
-setMethod("VarCorr",
-          signature=c("MLSpawExactOutput"),
-          definition=function(x, ...) {lme4::VarCorr(x@lme, ...)})
-setMethod("AIC",
-          signature=c("MLSpawExactOutput"),
-          definition=function(object, ..., k=2) {lme4::AIC(object@lme, ..., k)})
-setMethod("BIC",
-          signature=c("MLSpawExactOutput"),
-          definition=function(object, ..., k=2) {lme4::BIC(object@lme, ..., k)})
+setMethod("VarCorr", "MLSpawExactOutput",
+          function(x, sigma, rdig) VarCorr(x@lme, sigma, rdig))
+setMethod("AIC", "MLSpawExactOutput",
+          function(object, ..., k=2) AIC(object@lme, ..., k=k))
+setMethod("BIC", "MLSpawExactOutput",
+          function(object, ..., k=2) BIC(object@lme, ..., k=k))
 
-printSmlObject <- function(x, is.print=TRUE) {
-  print(x@lme)
+printSmlObject <- function(x, is.print=TRUE, ...) {
+  print(x@lme, ...)
   cat("\nStandardised fixed effects:\n")
-  print(x@beta)
+  print(x@beta, ...)
+  invisible(x)
 }
+## print() is S3 generic ==> define an S3 method {or none; show() is good enough}:
+print.MLSpawExactOutput <- printSmlObject
 
-setGeneric("print")
-setMethod("print", signature="MLSpawExactOutput",
-          definition=printSmlObject)
 setMethod("show", signature="MLSpawExactOutput",
-          definition=function(object) {printSmlObject(object, is.print=FALSE)})
+          function(object) printSmlObject(object, is.print=FALSE))
 
 PerformMLSpawExact <- function(obj, ...) {
   ## create an output object
@@ -125,7 +125,7 @@ PerformMLSpawExact <- function(obj, ...) {
                          data=merged.data, ...)
 
   ## compute the standardised coefficients for contextual data
-  coefficient.names <- names(output.obj@lme@fixef)[-1]
+  coefficient.names <- names(fixef(output.obj@lme))[-1]
   nb.coefficients <- length(coefficient.names)
   output.obj@beta <- numeric(nb.coefficients)
   names(output.obj@beta) <- coefficient.names
@@ -137,7 +137,7 @@ PerformMLSpawExact <- function(obj, ...) {
     } else {
       sd.explanatory <- sd(as.numeric(obj@individual.level.data[[name]]))
     }
-    output.obj@beta[[name]] <- output.obj@lme@fixef[[name]]*sd.explanatory/sd.outcome
+    output.obj@beta[[name]] <- fixef(output.obj@lme)[[name]]*sd.explanatory/sd.outcome
   }
   return(output.obj)
 }
@@ -146,13 +146,15 @@ MLSpawExact <- function(individual.level.data,
                         context.id,
                         formula,
                         precise.data=NULL,
+                        verbose=TRUE,
                         ...) {
   ## build the MLSpawExactobject
   obj <-
     MakeMLSpawExactObject(individual.level.data = individual.level.data,
                           context.id = context.id,
                           formula = formula,
-                          precise.data = precise.data)
+                          precise.data = precise.data,
+                          verbose=verbose)
   model <- PerformMLSpawExact(obj, ...)
   return(model)
 }

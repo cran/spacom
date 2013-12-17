@@ -30,7 +30,8 @@ MakeExploreMLSpawObject <-
            design.weight.names=NULL,
            aggregation.function="mean",
            kernel=NULL,
-           additional.args=NULL)
+           additional.args=NULL,
+           verbose=NULL)
 {
   obj <- new("ExploreSpawML")
 
@@ -76,9 +77,9 @@ MakeExploreMLSpawObject <-
   if (is(distance.matrix, "data.frame")) {
     distance.matrix <- as.matrix(distance.matrix)
   }
-  if (!is(distance.matrix, "matrix")) {
-    stop("The distance matrix has to be of class 'matrix'. You specified an ",
-         "object of class '", class(distance.matrix), "'.")
+  if (!is(distance.matrix, "matrix") && !is(distance.matrix, "Matrix")) {
+    stop("The distance matrix has to be of class 'matrix' or 'Matrix'. You ",
+         "specified an object of class '", class(distance.matrix), "'.")
   }
 
   if (!nrow(distance.matrix) == ncol(distance.matrix)) {
@@ -91,7 +92,7 @@ MakeExploreMLSpawObject <-
          " (number of areas), you specified a square matrix of size ",
          nrow(distance.matrix))
   }
-  obj@distance.matrix <- distance.matrix
+  obj@distance.matrix <- Matrix(distance.matrix)
 
   ## check multilevel.bandwidths for consistency
   obj@multilevel.bandwidths <- checkBandwidths(multilevel.bandwidths)
@@ -109,8 +110,11 @@ MakeExploreMLSpawObject <-
   ## deal with kernel function
   obj@kernel <- checkKernel(kernel)
 
-    ## make sure the additional.args are ok
+  ## make sure the additional.args are ok
   obj@ additional.args <- additional.args
+
+  ## deal with verbose flag
+  obj@verbose <- check.flag(verbose, "verbose")
 
   return(obj)
 }
@@ -144,7 +148,8 @@ performExploreMLSpaw <- function(obj){
         nb.resamples=0,
         aggregation.functions=obj@aggregation.function,
         design.weight.names=obj@design.weight.name,
-        additional.args=obj@additional.args)
+        additional.args=obj@additional.args,
+        verbose=obj@verbose)
     }
 
     ## screw the pooch
@@ -155,7 +160,8 @@ performExploreMLSpaw <- function(obj){
     model <- MLSpawExact(individual.level.data=obj@individual.level.data,
                          context.id=obj@context.id,
                          formula=formula,
-                         precise.data=context)
+                         precise.data=context,
+                         verbose=obj@verbose)
     output.list[[paste("bandwidth = ", bandwidth)]] <- model
   }
 
@@ -170,7 +176,8 @@ ExploreMLSpawExact <-
            distance.matrix,
            multilevel.bandwidths,
            precise.data,
-           kernel=NULL)
+           kernel=NULL,
+           verbose=TRUE)
 {
 obj <-
   MakeExploreMLSpawObject(
@@ -185,7 +192,8 @@ obj <-
     design.weight.names=NULL,
     aggregation.function="weighted.mean",
     kernel=kernel,
-    additional.args=NULL)
+    additional.args=NULL,
+    verbose=verbose)
   output.obj <- performExploreMLSpaw(obj)
 }
 
@@ -200,7 +208,8 @@ ExploreMLSpawAggregate <-
            design.weight.names=NULL,
            aggregation.function="weighted.mean",
            kernel=NULL,
-           additional.args=NULL)
+           additional.args=NULL,
+           verbose=TRUE)
 {
 obj <-
   MakeExploreMLSpawObject(
@@ -215,6 +224,8 @@ obj <-
     design.weight.names=design.weight.names,
     aggregation.function=aggregation.function,
     kernel=kernel,
-    additional.args=additional.args)
+    additional.args=additional.args,
+    verbose=verbose)
+
   output.obj <- performExploreMLSpaw(obj)
 }

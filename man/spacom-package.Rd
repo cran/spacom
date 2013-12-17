@@ -74,15 +74,15 @@ Till Junge,
   Contributors:   Stephanie Glaeser, Davide Morselli
 }
 \references{
-Elcheroth, G., Penic, S., Fasel, R., Giudici, F., Glaeser, S., Joye, D., Le Goff, J.-M., Morselli, D., & Spini, D. (2012). Spatially weighted context data: a new approach for modelling the impact of collective experiences.\emph{LIVES Working Papers, 19}.
+  Elcheroth, G., Penic, S., Fasel, R., Giudici, F., Glaeser, S., Joye, D.,
+  Le Goff, J.-M., Morselli, D., & Spini, D. (2012). 
+  Spatially weighted context data: a new approach for modelling the
+  impact of collective experiences.
+  \emph{LIVES Working Papers, 19}.
 }
 \keyword{ "package" }
 \keyword{"spatial"}
-  \seealso{
-
-%~~ Optional links to other man pages, e.g. ~~
-\code{\link[geospacom:geospacom-package]{geospacom}}
-}
+%\seealso{\code{\link[geospacom:geospacom-package]{geospacom}}}
 \examples{
 
 ## Testing the model described in Elcheroth et al (2012), page 25, Equation 9.4
@@ -112,16 +112,17 @@ data(d_ident)
 ## proximity weights with bandwidths of 25, 50 and 100 km
 
 explo.wv <- ExploreMLSpawAggregate(individual.level.data=traces_ind,
- 								   contextual.name="w_all",
- 								   contextual.data=traces_event,
- 								   context.id="area.name",
- 								   formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+
- 								   higher_edu+(1|area.name),
- 								   distance.matrix=d_geo,
- 								   multilevel.bandwidths=c(25, 50, 100),
-							       design.weight.names = "weight",
- 								   aggregation.function = "weighted.mean",
-								   kernel = NULL)
+                                   contextual.name="w_all",
+                                   contextual.data=traces_event,
+                                   context.id="area.name",
+                                   formula=cg_ass~victim_d+comb_d+
+                                   male+age_1990+high_school+higher_edu+
+                                   (1|area.name),
+                                   distance.matrix=d_geo,
+                                   multilevel.bandwidths=c(25, 50, 100),
+                                   design.weight.names = "weight",
+                                   aggregation.function = "weighted.mean",
+                                   kernel = NULL)
 
 ## STEP 1: Create spatial weights
 
@@ -147,10 +148,9 @@ names(wv.agg) <- c("wv.50", "wv.id")
 
 mla.results <- ResampleMLSpawAggregate(individual.level.data=traces_ind,
 									   context.id="area.name",
-									   formula=cg_ass~victim_d+comb_d+male+age_1990+high_school+higher_edu+
-									   (1|area.name)+wv.50+wv.id,
-									   aggregates=wv.agg,
-									   precise.data=NULL)
+			formula= cg_ass ~ victim_d+ comb_d+ male+ age_1990+
+                                     high_school+ higher_edu + (1|area.name)+ wv.50 + wv.id,
+                        aggregates = wv.agg, precise.data=NULL)
 
 ## STEP 4: Test the residual spatial dependency of the previous model
 mla.results.moran <- MLSpawResidMoran(ml.spaw.obj=mla.results,

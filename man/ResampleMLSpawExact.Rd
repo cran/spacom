@@ -24,7 +24,8 @@ ResampleMLSpawExact(individual.level.data,
  confidence.intervals = c(0.95),
  nb.resamples = 1000,
  individual.sample.seed = NULL,
-...)
+ verbose = TRUE,
+ ...)
 }
 
 %- maybe also 'usage' for other objects documented here.
@@ -73,6 +74,12 @@ ResampleMLSpawExact(individual.level.data,
     }
     Defaults to \code{NULL}. 
   }
+
+  \item{verbose}{
+    if \code{TRUE}, progress information and an estimate of the remaining
+    computing time is shown at the screen. Defaults to \code{TRUE}
+  }
+
   \item{...}{
     All additional named arguments are handed through to the function
     \code{lme:lmer} (for example, \code{REML=TRUE}).

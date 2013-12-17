@@ -24,7 +24,8 @@ makeMoranObject <-
            distance.matrix,
            bandwidths,
            kernel,
-           confidence.intervals) {
+           confidence.intervals,
+           verbose) {
   obj <- new("MoranObject")
   if (is(ml.spaw.obj, "ResampleMLSpawOutput")) {
     obj@ranefs <- ml.spaw.obj@ranefs
@@ -54,6 +55,9 @@ makeMoranObject <-
       checkConfidenceIntervals(confidence.intervals, obj@nb.resamples)
   }
 
+  ## check verbose flag
+  obj@verbose <- check.flag(verbose, "verbose")
+
   return(obj)
 }
 
@@ -63,13 +67,15 @@ MLSpawResidMoran <-
            distance.matrix,
            bandwidths,
            kernel=NULL,
-           confidence.intervals=c(.95)) {
+           confidence.intervals=c(.95),
+           verbose=TRUE) {
     obj <- makeMoranObject(
       ml.spaw.obj=ml.spaw.obj,
       distance.matrix=distance.matrix,
       bandwidths=bandwidths,
       kernel=kernel,
-      confidence.intervals=confidence.intervals)
+      confidence.intervals=confidence.intervals,
+      verbose=verbose)
 
   tmp.matrix <- matrix(nrow=obj@nb.moron, ncol=obj@nb.resamples)
   row.names(tmp.matrix) <- lapply(bandwidths,
@@ -89,8 +95,10 @@ MLSpawResidMoran <-
         as.numeric(lm.morantest(lm(a~1, data=as.data.frame(reordered.ranefs)),
                                 listw=weight)$estimate[1])
       elapsed.time <- proc.time()[3] - start.time
-      cat("\rcomputed step ", column, " of ", obj@nb.resamples,
-          ". ETA = ", as.integer((obj@nb.resamples/column-1)*elapsed.time))
+      if (obj@verbose) {
+        cat("\rcomputed step ", column, " of ", obj@nb.resamples,
+            ". ETA = ", as.integer((obj@nb.resamples/column-1)*elapsed.time))
+      }
     }
     cat(
       "\rmoran done                                                         \n")

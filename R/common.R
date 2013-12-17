@@ -157,6 +157,14 @@ makeList <- function(nb.elem, object){
   return(ret.list)
 }
 
+## check that a flag is TRUE or FALSE
+check.flag <- function(flag, name = "unnamed") {
+  if (!is(flag, "logical")){
+    stop ("The flag '", name, "' needs to be of class 'logical', not '",
+          class(flag), "'")
+  }
+  return(flag)
+}
 
 ## checks whether a variable name is NULL or denotes a column of obj
 checkExistence <- function(name,
@@ -245,14 +253,14 @@ checkAllDesignWeights <- function(design.weight.names, contextual.names,
 checkWeightMatrix <- function(matrix, nb.area, name){
   nb.rows <- nrow(matrix)
   if (is.null(matrix)){}
-  else if (is(matrix, "matrix")){
+  else if (is(matrix, "matrix") || is(matrix, "Matrix")){
     if (nb.rows!=ncol(matrix) || nb.rows<nb.area){
       stop(cat("The weight matrix given for", name, "is", nb.rows, "x",
                ncol(matrix), "but should be square and at least", nb.area,
                "x", nb.area, '\n'))}
   } else {
-    stop(cat("The weight matrices have to be of type 'matrix' or NULL.",
-             "You gave an object of type", class(matrix), ".\n"))
+    stop(cat("The weight matrices have to be of type 'matrix', 'Matrix' or ",
+             "NULL. You gave an object of type", class(matrix), ".\n"))
   }
   return(nb.rows)
 }
@@ -523,7 +531,7 @@ checkConfidenceIntervals <- function(confidence.intervals, nb.resamples){
 checkKernel <- function(kernel) {
   if (is.null(kernel)) {
     kernel <- function(distance.matrix, h) {
-      return(.5^((distance.matrix/h)^2))
+      return(Matrix(.5^((distance.matrix/h)^2), sparse=TRUE))
     }
   } else if (!is(kernel, "function")) {
     stop("The kernel function has to be of class 'function'. You specified a ",
@@ -637,10 +645,10 @@ performAggregation <- function(contextual.names,
         arguments[[name]] <- contextual.data[[name]]
         ## compute combined spatial and design weights
         weights <- computeWeights(design.weight.name,
-                                    contextual.data[[design.weight.name]],
-                                    contextual.data[[context.id]],
-                                    contextual.weight.matrices[[coded.name]],
-                                    area)
+                                  contextual.data[[design.weight.name]],
+                                  contextual.data[[context.id]],
+                                  contextual.weight.matrices[[coded.name]],
+                                  area)
         ## if either spatial or design weights are specified, we need to
         ## add them to the arguments
         if (!is.null(design.weight.name) ||
@@ -801,8 +809,32 @@ wt.gini.group <- function(data, weights=rep(1, length(data)), groups) {
 }
 
 
+wt.GRI <- function(data, weights= rep(1, length(data)), groups) {
+    unique.groups <- unique(groups)
+    nb.groups <- length(unique.groups)
+    nb.binoms <- nb.groups*(nb.groups-1)/2
 
-
+    r <- numeric(nb.groups)
+    for (i in 1:nb.groups) {
+        group <- unique.groups[i]
+        group.data <- data[groups==group]
+        group.weights <- weights[groups==group]
+        r[i] <- weighted.mean(group.data, group.weights)
+    }
+    one.minus.GRI <- 0
+    for (i in 1:(nb.groups-1)) {
+        for (j in (i+1):nb.groups) {
+            one.minus.GRI <- one.minus.GRI + abs(r[i]-r[j])
+        }
+    }
+    max.diff = 0
+    for (i in 1:nb.groups) {
+        max.diff = max.diff + floor(i/2)
+    }
+    m <- max.diff/nb.binoms
+    GRI <- 1-one.minus.GRI/(nb.binoms*m)
+    return(GRI)
+}
 ## Gini when x takes a finite number of value
 
 wt.gini.categ <- function(data, weights=rep(1, length(data)))
@@ -879,9 +911,8 @@ wt.Theil <- function(data, weights=rep(1, length(data)))
   Th <-weighted.mean(d,weights)
 
   return(Th)
-
-
 }
+
 
 ##This closure returns the functions fillMatrices, getRanefs, getTmpList
 randomEffectsClosure <- function(nb.area, nb.resamples) {
@@ -964,8 +995,8 @@ randomEffectsClosure <- function(nb.area, nb.resamples) {
     fixed.effect.results[, index] <<- lme4::fixef(lme.obj)
     prepareRandomEffects(lme.obj, index)
 
-    aic.results[1, index] <<- lme4::AIC(lme.obj)
-    aic.results[2, index] <<- lme4::BIC(lme.obj)
+    aic.results[1, index] <<- AIC(lme.obj)
+    aic.results[2, index] <<- BIC(lme.obj)
     aic.results[3, index] <<- as.numeric(logLik(lme.obj))
     aic.results[4, index] <<- deviance(lme.obj, REML=FALSE)
     aic.results[5, index] <<- deviance(lme.obj, REML=TRUE)

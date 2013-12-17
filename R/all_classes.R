@@ -52,11 +52,14 @@ setClass("MLSpawExactObject",
                         formula="formula",
 
                         ## number of analyses to perform
-                        nb.analyses="integer"))
+                        nb.analyses="integer",
+
+                        ## verbose flag
+                        verbose="logical"))
 
 setClass("MLSpawExactOutput",
-         representation(## the mer object of the lme4 analysis
-                        lme="mer",
+         representation(## the mer model object of the lme4 analysis
+                        lme="merMod",
 
                         ## data frame containing the standardized coefficients
                         beta="numeric"))
@@ -65,7 +68,7 @@ setClass("weightsObject",
                         ## list must have same length as contextual.names
                         ## may contain NULL's for variables which should not be
                         ## weighted at the contextual level
-                        distance.matrix="matrix",
+                        distance.matrix="Matrix",
 
                         ## kernel function used to apply to the distance matrix
                         kernel="function",
@@ -130,7 +133,10 @@ setClass(Class="SpawExactObject",
                         contextual.weight.matrices="MultiKeyHash",
 
                         ## list of population weights to be applied
-                        population.weight.names="MultiKeyHash")
+                        population.weight.names="MultiKeyHash",
+
+                        ## verbose flag
+                        verbose="logical")
          )
 
 
@@ -295,7 +301,10 @@ setClass("MoranObject",
 
                         ## vector of percentiles and their labels to be
                         ## evaluated
-                        percentiles="numeric"
+                        percentiles="numeric",
+
+                        ## verbose flag
+                        verbose="logical"
 ))
 
 ## Definition of an object containing everything needed to run a resampled
@@ -425,7 +434,7 @@ setClass(Class="ResampleExploreSpawML",
 
                         ## Distance matrix from which weight matrices will be
                         ## computed
-                        distance.matrix="matrix",
+                        distance.matrix="Matrix",
 
                         ## bandwidths for the multilevel analysis
                         multilevel.bandwidths="numeric",
@@ -500,7 +509,7 @@ setClass(Class="ExploreSpawML",
 
                         ## Distance matrix from which weight matrices will be
                         ## computed
-                        distance.matrix="matrix",
+                        distance.matrix="Matrix",
 
                         ## bandwidths for the multilevel analysis
                         multilevel.bandwidths="numeric",
@@ -533,7 +542,11 @@ setClass(Class="ExploreSpawML",
                         ## for one aggregation function taking "group_id" as
                         ## additional argument and one taking both ("group_id"
                         ## and "gender")
-                        additional.args="ANY"))
+                        additional.args="ANY",
+
+
+                        ## verbose flag
+                        verbose="logical"))
 
 
 

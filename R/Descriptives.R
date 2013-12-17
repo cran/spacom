@@ -26,6 +26,7 @@ MakeSpawExactObject <- function(contextual.data,
                                 contextual.names,
                                 contextual.weight.matrices,
                                 population.weight.names,
+                                verbose,
                                 obj=NULL){
   ## create an empty SpawExactObject
   pedantic.check <- FALSE
@@ -108,6 +109,9 @@ MakeSpawExactObject <- function(contextual.data,
                           context.variables=names(obj@contextual.data),
                           nb.analyses=obj@nb.analyses,
                           level="population")
+  
+  ## check verbose flag
+  obj@verbose <- check.flag(verbose, "verbose")
   return(obj)
 }
 
@@ -119,9 +123,15 @@ performSpawExact <- function(obj){
   for(name in decoded.names) {
     count.list[[name]] <- 0}
 
+
+
+  ## the order of the columns in the matrix do not necessarily correspond to
+  ## order of the areas in the data. Hence we need to look out for it
+  context.order <- order(obj@contextual.data[[obj@context.id]])
+
   ## prepare the merge dataframe into which the new weighted contextual data
   ## are loaded
-  merge.data <- data.frame(obj@contextual.data[[obj@context.id]])
+  merge.data <- data.frame(obj@contextual.data[[obj@context.id]][context.order])
   names(merge.data) <- obj@context.id
   ## loop through the contextual variables to be analysed
 
@@ -130,15 +140,25 @@ performSpawExact <- function(obj){
     len <- nchar(coded.name)
     name <- substr(coded.name, 1, len-5)
 
-    context <- obj@contextual.data[[name]]
+    context <- as.matrix(obj@contextual.data[[name]][context.order], ncol=1)
     population.weight.name <- obj@population.weight.names[[coded.name]]
     if (!is.null(population.weight.name)) {
-      weight <- obj@contextual.data[[population.weight.name]]
+      weight <- as.matrix(obj@contextual.data[[population.weight.name]][context.order],
+                          ncol)
       context <- context * weight/mean(weight)
     }
     spatial.weight = obj@contextual.weight.matrices[[coded.name]]
     if (!is.null(spatial.weight)) {
-      context = (spatial.weight %*% context/rowSums(spatial.weight))
+      spatial.order <- order(colnames(spatial.weight))
+      spatial.weight <- spatial.weight[spatial.order, spatial.order]
+      tryCatch( {
+          context = as.matrix(spatial.weight %*% context/rowSums(spatial.weight))
+      }, error=function(e) {
+          print("weight class = ")
+          print(class(spatial.weight))
+          print("rowSums(weight):");
+          print(rowSums(spatial.weight));
+          stop("fucked up when trying to multiply the weight matrix of dim  ", dim(spatial.weight), "with the context ", context)})
     }
     ## store the aggregated context in merge.data for later merge with
     ## the rest, compute the appropriate renaming of the contextual variables
@@ -160,7 +180,8 @@ SpawExact <- function(precise.data,
                             context.id,
                             contextual.names,
                             contextual.weight.matrices,
-                            population.weight.names)
+                            population.weight.names,
+                            verbose=FALSE)
   output <- performSpawExact(obj)
   return(output)
 }
@@ -177,7 +198,8 @@ MakeSpawAggregateObject <- function(contextual.data,
                                     confidence.intervals,
                                     design.weight.names,
                                     sample.seed,
-                                    additional.args){
+                                    additional.args,
+                                    verbose){
   ## use the parent class' maker function
   obj <-
   MakeSpawExactObject(contextual.data = contextual.data,
@@ -185,6 +207,7 @@ MakeSpawAggregateObject <- function(contextual.data,
                       contextual.names = contextual.names,
                       contextual.weight.matrices = contextual.weight.matrices,
                       population.weight.names=NULL,
+                      verbose,
                       obj=new("SpawAggregateObject"))
   ##
   obj@nb.resamples <- as.integer(nb.resamples)
@@ -325,10 +348,11 @@ performSpawAggregate <- function(obj, exploratory=FALSE) {
                            obj@contextual.weight.matrices,
                          additional.args = obj@additional.args)
     fillAggregationResults(frame, column)
-    elapsed.time <- proc.time()[3] - start.time
-    cat("\rcomputed step ", column, " of ", obj@nb.resamples,
-        ". ETA = ", as.integer((obj@nb.resamples/column-1)*elapsed.time))
-
+    if (obj@verbose) {
+        elapsed.time <- proc.time()[3] - start.time
+        cat("\rcomputed step ", column, " of ", obj@nb.resamples,
+            ". ETA = ", as.integer((obj@nb.resamples/column-1)*elapsed.time))
+    }
     NULL
   }
   gc(FALSE)
@@ -387,7 +411,8 @@ SpawAggregate <- function(contextual.data,
                           confidence.intervals=.95,
                           design.weight.names=NULL,
                           sample.seed=NULL,
-                          additional.args=NULL){
+                          additional.args=NULL,
+                          verbose=TRUE){
   input.obj <- MakeSpawAggregateObject(contextual.data,
                                        context.id,
                                        contextual.names,
@@ -397,6 +422,7 @@ SpawAggregate <- function(contextual.data,
                                        confidence.intervals,
                                        design.weight.names,
                                        sample.seed,
-                                       additional.args)
+                                       additional.args,
+                                       verbose)
   return(performSpawAggregate(input.obj))
 }

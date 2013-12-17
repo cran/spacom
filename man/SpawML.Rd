@@ -11,17 +11,18 @@
 MLSpawExact(individual.level.data,
  context.id,
  formula,
- precise.data,
+ precise.data=NULL,
+ verbose=TRUE,
  ...)
 }
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{individual.level.data}{
-   A \code{data.frame} containing the individual level predictor 
+   A \code{data.frame} containing the individual level predictor
    and outcome variables. The data must be numeric (\code{logical},
-    \code{integer}, or plain \code{numeric}). There must not be any 
-    missing values, \code{NaN}s, \code{NULL}s or \code{NA}s.  
+    \code{integer}, or plain \code{numeric}). There must not be any
+    missing values, \code{NaN}s, \code{NULL}s or \code{NA}s.
   }
   \item{context.id}{
     The name of the context ID variable. This variable allows matching
@@ -30,15 +31,20 @@ MLSpawExact(individual.level.data,
   any type but need to be defined consitently across data sets.
   }
   \item{formula}{
-   Formula description of the model.The formula is handed down to \code{lmer} 
+   Formula description of the model.The formula is handed down to \code{lmer}
    function of the package \code{lme4}. Refer to the documentation of \code{lmer}
    for details.
   }
-  
+
   \item{precise.data}{
-       A \code{data.frame} containing the precise contextual data.There must 
-    not be any missing values, \code{NaN}s, \code{NULL}s or \code{NA}s. 
+       A \code{data.frame} containing the precise contextual data.There must
+    not be any missing values, \code{NaN}s, \code{NULL}s or \code{NA}s.
     By default set to \code{NULL}.
+  }
+
+  \item{verbose}{
+  if \code{TRUE}, progress information and an estimate of the remaining
+  computing time is shown at the screen. Defaults to \code{TRUE}
   }
 
   \item{...}{
@@ -61,14 +67,14 @@ MLSpawExact(individual.level.data,
 }
 \examples{
 ## Spatially weighted multilevel analysis, with standard estimates of
-## standard errors. 
+## standard errors.
 ## It is step-3 function
-## Model with two contextual predictors, treated as precise, 
-## predicting collective guilt acceptance. 
+## Model with two contextual predictors, treated as precise,
+## predicting collective guilt acceptance.
 
 ## Data preparation
 ## load individual level data, remove collective guilt assignment from the
-## data frame, and remove NA's 
+## data frame, and remove NA's
 data(traces_ind)
 
 traces_ind <- traces_ind[,-7]
