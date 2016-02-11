@@ -1,8 +1,9 @@
+importFrom("stats", "AIC", "BIC", "aggregate", "as.formula", "deviance", "lm",
+             "logLik", "quantile", "runif", "sd", "weighted.mean")# and many more!
 
-importFrom("stats", AIC, BIC)# and many more!
-
-importFrom("methods", setClass, representation,
-           setGeneric, setMethod, signature, new)
+importFrom("methods", "setClass", "representation",
+           "setGeneric", "setMethod", "signature", "new", "show",
+           "is", "slot<-", "slotNames")
 
 importFrom("nlme", VarCorr, fixef, ranef)# lme4 also imports and exports them 
 importFrom("lme4", lmer)

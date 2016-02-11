@@ -1,5 +1,6 @@
 #### new tests on the test data
 library(spacom)
+library(methods)
 
 data(d_geo)
 data(traces_event)

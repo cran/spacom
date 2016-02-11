@@ -1,10 +1,10 @@
-###############################################################################
 ################################################################################
-## author Till Junge <till.junge@gmail.com>                                   ##
+################################################################################
+## author Till Junge <till.junge@altermail.ch>                                ##
 ## author Mathieu Cossutta <mcossutta@gmail.com>                              ##
 ##                                                                            ##
 ## Copyright (c) UNIL (Universite de Lausanne)                                ##
-## NCCR - LIVES (National Centre of Competence in Research "LIVES –           ##
+## NCCR - LIVES (National Centre of Competence in Research "LIVES -           ##
 ## Overcoming vulnerability: life course perspectives",                       ##
 ## <http://www.lives-nccr.ch/>)                                               ##
 ##                                                                            ##
@@ -302,8 +302,7 @@ performSpawAggregate <- function(obj, exploratory=FALSE) {
 
   ## temporary array object to gather the results
   aggregation.results <-
-    array(dim=c(obj@nb.area, max(obj@nb.resamples, 1), obj@nb.analyses),
-          dimnames=c('row', 'col', 'var'))
+    array(dim=c(obj@nb.area, max(obj@nb.resamples, 1), obj@nb.analyses))
 
   ## inserts the analyses at the right position in the results
   fillAggregationResults <- function(frame, index){

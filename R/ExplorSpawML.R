@@ -1,9 +1,9 @@
 ################################################################################
 ################################################################################
-## author Till Junge <till.junge@gmail.com>                                   ##
+## author Till Junge <till.junge@altermail.ch>                                ##
 ##                                                                            ##
 ## Copyright (c) UNIL (Universite de Lausanne)                                ##
-## NCCR - LIVES (National Centre of Competence in Research "LIVES –           ##
+## NCCR - LIVES (National Centre of Competence in Research "LIVES -           ##
 ## Overcoming vulnerability: life course perspectives",                       ##
 ## <http://www.lives-nccr.ch/>)                                               ##
 ##                                                                            ##

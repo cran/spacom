@@ -17,6 +17,7 @@ Type 'q()' to quit R.
 
 > #### new tests on the test data
 > library(spacom)
+> library(methods)
 > 
 > data(d_geo)
 > data(traces_event)
@@ -113,7 +114,7 @@ Computing I for bandwidth 200
 > 
 > print(mor.test1)
               I
-h.25  0.2358699
+h.25  0.2358700
 h.50  0.2571815
 h.100 0.2484977
 h.200 0.1791367
@@ -372,9 +373,11 @@ In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
 +     precise.data=NULL,
 +     verbose=FALSE)
 spacom done                                                        
-Warning message:
-In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
+Warning messages:
+1: In checkConfidenceIntervals(confidence.intervals, obj@nb.resamples) :
   Warning, the confidence interval 1 = 0.95 excludes only 1 individuals. It may be unreliable.
+2: Some predictor variables are on very different scales: consider rescaling 
+3: Some predictor variables are on very different scales: consider rescaling 
 > 
 > proc.time()
    user  system elapsed 
